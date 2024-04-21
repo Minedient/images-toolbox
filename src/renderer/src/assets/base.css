@@ -1,0 +1,20 @@
+:root {
+    
+    --background-dark: #1b1b1b;
+    --background-soft-dark: #222222;
+    --background-mute-dark: #282828;
+    
+    --container-dark: #333333;
+
+    --text-white: rgba(255, 255, 245, 0.86);
+    --text-white-highlight: rgba(255, 255, 245, 0.96);
+    --text-white-soft: rgba(235, 235, 245, 0.6);
+    --text-white-mute: rgba(235, 235, 245, 0.38);
+
+    --border-color: #414853;
+
+    --button-background-border: #414853;
+    --button-background-hover: #32363f;
+    --button-background: var(--background-dark);
+
+}
