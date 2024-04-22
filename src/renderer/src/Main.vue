@@ -20,6 +20,7 @@ const changePage = (page: string) => workspaceType.value = page;
         <button @click="changePage('Rotate')">rotate</button>
         <button @click="changePage('Option')">option</button>
         <button @click="changePage('About')">about</button>
+        <button @click="changePage('Help')">help</button>
     </div>
     <div class="container" id="workspace">
         <!-- This shit took me 6 hours to realize it-->

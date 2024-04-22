@@ -10,6 +10,7 @@ const dragzone = ref('');
 const imagesObjs: ImageObj[] = reactive([]);
 const hasDetailed = ref(false);
 const dImageObj = reactive(<ImageObj>{});
+const collapsed = ref('collapsed');
 
 //TODO: Use an object to store the image details and update them reactively
 
@@ -47,6 +48,12 @@ const clearImagesPanel = () => {
 
 const loadImageToDetailedViewer = (event: MouseEvent) => {
     const target = event.target as HTMLImageElement;
+    if (hasDetailed.value) {
+        if (dImageObj.fileURL === target.src) {
+            hasDetailed.value = false;
+            return;
+        }
+    }
     hasDetailed.value = true;
     const imageObj = imagesObjs.find(obj => obj.fileURL === target.src);
     if (imageObj) {
@@ -54,6 +61,13 @@ const loadImageToDetailedViewer = (event: MouseEvent) => {
         dImageObj.fileURL = imageObj.fileURL;
     };
 }
+
+const expandCollapsedDiv = (event: MouseEvent) => {
+    const div = (event.target as HTMLElement).nextElementSibling as HTMLElement;
+    collapsed.value = collapsed.value === 'collapsed' ? 'expanded' : 'collapsed';
+    div.style.maxHeight = collapsed.value === 'collapsed' ? '0px' : div.scrollHeight + 'px';
+}
+
 /**
  * Read dropped files and directories
  * @param entries The DataTransfer object containing the files
@@ -97,25 +111,56 @@ async function getAllFiles(entries: any[]) {
 </script>
 
 <template>
+
     <div class="container vertical" id="tweaker">
         <div class="borderless-container" id="dropzone" :class="dragzone">
             <input type="file" id="file-input" multiple webkitdirectory hidden @change="filesSelected">
             <label for="file-input" @dragover="dragover" @dragleave="dragleave" @drop="filesDropped">Drop files here or
                 click on me</label>
         </div>
-        <div id="button-list"><button class="small-button" @click="clearImagesPanel">Clear Selection</button></div>
+        <div id="button-list">
+            <button class="small-button" @click="">Encode all</button>
+            <button class="small-button" @click="">Encode selected</button>
+            <button class="small-button" @click="clearImagesPanel">Clear Selection</button>
+        </div>
         <hr class="fw-hr">
-
+        <div class="container vertical">
+            <h3 id="c-h3" @click="expandCollapsedDiv">Encoding parameters</h3>
+            <div id="encoding-parameters">
+                <div id="is-auto">
+                    <p>Auto?</p>
+                    <input type="checkbox" checked>
+                </div>
+                <div id="manual-parameters">
+                    <p>Quality</p>
+                    <input type="range" min="0" max="100" step="1" value="100">
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!--Images Viewer-->
     <div class="container" id="images-viewer">
         <img v-for="image in imagesObjs" :src="image.fileURL" @click="loadImageToDetailedViewer">
     </div>
+
+    <!--Detailed Viewer-->
     <div class="container vertical" id="detailed-viewer">
-        <img v-if="hasDetailed" :src="dImageObj.fileURL">
-        <hr v-if="hasDetailed" class="fw-hr">
-        <p v-if="hasDetailed">Name: {{ dImageObj.file.name }}</p>
-        <p v-if="hasDetailed">Type: {{ dImageObj.file.type }}</p>
-        <p v-if="hasDetailed">Size: {{ ((dImageObj.file.size) / 1024.0).toFixed(3) }} kB</p>
+        <div v-if="hasDetailed">
+            <img :src="dImageObj.fileURL">
+            <hr class="fw-hr">
+            <h3>Details</h3>
+            <div id="detailed-info-grid">
+                <p>Name: </p>
+                <p>{{ dImageObj.file.name }}</p>
+                <p>Type: </p>
+                <p>{{ dImageObj.file.type }}</p>
+                <p>Size: </p>
+                <p>{{ ((dImageObj.file.size) / 1024.0).toFixed(3) }} kB</p>
+                <p>L. M: </p>
+                <p>{{ new Date(dImageObj.file.lastModified) }}</p>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -193,5 +238,38 @@ async function getAllFiles(entries: any[]) {
     border: 1px solid black;
     margin: 5px;
     transition: transform 0.2s ease;
+}
+
+#detailed-info-grid {
+    display: inline-grid;
+    grid-template-columns: auto 1fr;
+    grid-column-gap: 10px;
+}
+
+#detailed-info-grid p {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#encoding-parameters {
+    transition: max-height 0.5s ease;
+    overflow: hidden;
+    line-height: 0.3em;
+    text-align: left;
+}
+
+#c-h3 {
+    cursor: pointer;
+    width: 100%;
+    margin: 0px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+#is-auto {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 10px;
 }
 </style>
