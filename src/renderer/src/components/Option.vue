@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { EncodingConstants as EC} from '@renderer/constants/number';
+import { EncodingConstants as EC} from '../constants/number';
 </script>
 
 <template>

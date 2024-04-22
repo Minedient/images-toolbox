@@ -1,10 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { reactive, ref } from 'vue';
+
+interface ImageObj {
+    file: File,
+    fileURL: string
+}
+
 const dragzone = ref('');
-const images = ref(<File[]>[]);
-const imagesURL = ref(<string[]>[]);
+const imagesObjs: ImageObj[] = reactive([]);
 const hasDetailed = ref(false);
-const detailed= ref(<string>'');
+const dImageObj = reactive(<ImageObj>{});
 
 //TODO: Use an object to store the image details and update them reactively
 
@@ -12,14 +17,16 @@ const filesDropped = async (event: DragEvent) => {
     event.preventDefault();
     dragzone.value = '';
     const files = (await readDroppedEntries(event.dataTransfer)).flat().filter(file => file.type.startsWith('image/'));
-    images.value = files;
-    console.log(files);
+    files.forEach(file => {
+        imagesObjs.push({ file: file, fileURL: URL.createObjectURL(file) })
+    });
 }
 
 const filesSelected = async (event: Event) => {
     const files = (event.target as HTMLInputElement).files;
-    images.value = files ? [...files].filter(file => file.type.startsWith('image/')) : [];
-    console.log(files);
+    (files ? [...files].filter(file => file.type.startsWith('image/')) : []).forEach(file => {
+        imagesObjs.push({ file: file, fileURL: URL.createObjectURL(file) })
+    });
 }
 
 const dragleave = (event: DragEvent) => {
@@ -32,24 +39,20 @@ const dragover = (event: DragEvent) => {
     dragzone.value = 'dragenter';
 }
 
-const getURL = (file: File) => {
-    const str = URL.createObjectURL(file);
-    imagesURL.value.push(str);
-    return str;
-};
-const clearURL = (file: string) => {
-    URL.revokeObjectURL(file);}
-
 const clearImagesPanel = () => {
-    images.value = [];
-    imagesURL.value.forEach(s=>clearURL(s));
-    imagesURL.value = [];
+    imagesObjs.forEach(obj => URL.revokeObjectURL(obj.fileURL));
+    imagesObjs.splice(0, imagesObjs.length);
+    hasDetailed.value = false;
 }
 
 const loadImageToDetailedViewer = (event: MouseEvent) => {
     const target = event.target as HTMLImageElement;
     hasDetailed.value = true;
-    detailed.value = target.src;
+    const imageObj = imagesObjs.find(obj => obj.fileURL === target.src);
+    if (imageObj) {
+        dImageObj.file = imageObj.file;
+        dImageObj.fileURL = imageObj.fileURL;
+    };
 }
 /**
  * Read dropped files and directories
@@ -105,13 +108,14 @@ async function getAllFiles(entries: any[]) {
 
     </div>
     <div class="container" id="images-viewer">
-        <img v-for="image in images" :src="getURL(image)" @click="loadImageToDetailedViewer">
+        <img v-for="image in imagesObjs" :src="image.fileURL" @click="loadImageToDetailedViewer">
     </div>
     <div class="container vertical" id="detailed-viewer">
-        <img v-if="hasDetailed" :src="detailed">
+        <img v-if="hasDetailed" :src="dImageObj.fileURL">
         <hr v-if="hasDetailed" class="fw-hr">
-        <p v-if="hasDetailed">Name: </p>
-        <p v-if="hasDetailed">Type: </p>
+        <p v-if="hasDetailed">Name: {{ dImageObj.file.name }}</p>
+        <p v-if="hasDetailed">Type: {{ dImageObj.file.type }}</p>
+        <p v-if="hasDetailed">Size: {{ ((dImageObj.file.size) / 1024.0).toFixed(3) }} kB</p>
     </div>
 </template>
 
@@ -182,7 +186,7 @@ async function getAllFiles(entries: any[]) {
     align-items: center;
 }
 
-#detailed-viewer img{
+#detailed-viewer img {
     width: 100%;
     height: auto;
     border-radius: 5px;

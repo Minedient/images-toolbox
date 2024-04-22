@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import Encode from './components/Encode.vue';
 import Option from './components/Option.vue';
 const buttonList = ref('buttonList');
-const workspaceType = ref('Encode');   // Only if the object itself is changed, that trigger change
+const workspaceType = ref('Encode');
 const workspaces = {
     'Encode': Encode,
     'Option': Option
