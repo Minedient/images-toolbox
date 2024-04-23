@@ -10,7 +10,11 @@ const dragzone = ref('');
 const imagesObjs: ImageObj[] = reactive([]);
 const hasDetailed = ref(false);
 const dImageObj = reactive(<ImageObj>{});
-const collapsed = ref('collapsed');
+const epMaxHeight = ref(0);
+const isAuto = ref(true);
+const isLossless = ref(true);
+const zCompression = ref(6);
+const quality = ref(80);
 
 //TODO: Use an object to store the image details and update them reactively
 
@@ -64,8 +68,27 @@ const loadImageToDetailedViewer = (event: MouseEvent) => {
 
 const expandCollapsedDiv = (event: MouseEvent) => {
     const div = (event.target as HTMLElement).nextElementSibling as HTMLElement;
-    collapsed.value = collapsed.value === 'collapsed' ? 'expanded' : 'collapsed';
-    div.style.maxHeight = collapsed.value === 'collapsed' ? '0px' : div.scrollHeight + 'px';
+    epMaxHeight.value = epMaxHeight.value === 0 ? div.scrollHeight : 0;
+}
+
+const checkboxAuto = (event: Event) => {
+    const checkbox = event.target as HTMLInputElement;
+    isAuto.value = checkbox.checked;
+}
+
+const selectMode = (event: Event) => {
+    const select = event.target as HTMLSelectElement;
+    isLossless.value = select.value === 'true';
+}
+
+const inputZCompression = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    zCompression.value = Number(input.value);
+}
+
+const inputQuality = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    quality.value = Number(input.value);
 }
 
 /**
@@ -126,14 +149,29 @@ async function getAllFiles(entries: any[]) {
         <hr class="fw-hr">
         <div class="container vertical">
             <h3 id="c-h3" @click="expandCollapsedDiv">Encoding parameters</h3>
-            <div id="encoding-parameters">
+            <div id="encoding-parameters" :style="{ 'max-height': epMaxHeight + 'px' }">
                 <div id="is-auto">
                     <p>Auto?</p>
-                    <input type="checkbox" checked>
+                    <input type="checkbox" checked @change="checkboxAuto">
                 </div>
                 <div id="manual-parameters">
-                    <p>Quality</p>
-                    <input type="range" min="0" max="100" step="1" value="100">
+                    <label for="mode-select">Choose mode: </label>
+                    <select id="mode-select" name="mode" :disabled=isAuto @change="selectMode">
+                        <option value=true>Lossless</option>
+                        <option value=false>Lossy</option>
+                    </select>
+                    <div id="left-right-panel">
+                        <div id="left-column" v-if="isLossless">
+                            <p>Z-Compression</p>
+                            <input id="z-compression" type="range" min="0" max="9" step="1" value="6" :disabled=isAuto @input="inputZCompression">
+                            <label for="z-compression">{{zCompression}}</label>
+                        </div>
+                        <div id="right-column" v-if="!isLossless">
+                            <p>Quality</p>
+                            <input id="quality" type="range" min="0" max="100" step="5" value="100" :disabled=isAuto @input="inputQuality">
+                            <label for="quality">{{quality}}</label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -225,6 +263,7 @@ async function getAllFiles(entries: any[]) {
     display: flex;
     justify-content: center;
     margin-top: 10px;
+    column-gap: 5px;
 }
 
 #detailed-viewer {
@@ -271,5 +310,13 @@ async function getAllFiles(entries: any[]) {
     justify-content: start;
     align-items: center;
     gap: 10px;
+}
+
+#left-right-panel {
+    display: flex;
+    align-items: center;
+}
+#left-right-panel div{
+    flex-grow: 1;
 }
 </style>
