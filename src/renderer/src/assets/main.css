@@ -59,3 +59,7 @@ button:hover {
     border: none;
     box-shadow: none;
 }
+
+.container .column-container {
+    flex-direction: column;
+}

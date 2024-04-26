@@ -2,11 +2,13 @@
 import { ref } from 'vue';
 import Encode from './components/Encode.vue';
 import Option from './components/Option.vue';
+import Help from './components/Help.vue';
 const buttonList = ref('buttonList');
 const workspaceType = ref('Encode');
 const workspaces = {
     'Encode': Encode,
-    'Option': Option
+    'Option': Option,
+    'Help': Help
 }
 // Functions
 const changePage = (page: string) => workspaceType.value = page;
@@ -22,12 +24,11 @@ const changePage = (page: string) => workspaceType.value = page;
         <button @click="changePage('About')">about</button>
         <button @click="changePage('Help')">help</button>
     </div>
-    <div class="container" id="workspace">
-        <!-- This shit took me 6 hours to realize it-->
-        <KeepAlive>
-            <component :is="workspaces[workspaceType]" />
-        </KeepAlive>
-    </div>
+
+    <!-- This shit took me 6 hours to realize it-->
+    <KeepAlive>
+        <component :is="workspaces[workspaceType]" />
+    </KeepAlive>
 </template>
 
 <style>
@@ -37,14 +38,5 @@ const changePage = (page: string) => workspaceType.value = page;
     justify-content: flex-start;
     flex-wrap: wrap;
     gap: 10px;
-}
-
-/* ID */
-#workspace {
-    display: grid;
-    grid-template-columns: 1fr 1.8fr 1.2fr;
-    grid-column-gap: 10px;
-    margin-top: 10px;
-    width: auto;
 }
 </style>

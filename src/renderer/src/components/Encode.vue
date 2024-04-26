@@ -15,6 +15,9 @@ const isAuto = ref(true);
 const isLossless = ref(true);
 const zCompression = ref(6);
 const quality = ref(80);
+const method = ref(4);
+
+const selectedImages: ImageObj[] = reactive([]);
 
 //TODO: Use an object to store the image details and update them reactively
 
@@ -91,6 +94,11 @@ const inputQuality = (event: Event) => {
     quality.value = Number(input.value);
 }
 
+const inputMethod = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    method.value = Number(input.value);
+}
+
 /**
  * Read dropped files and directories
  * @param entries The DataTransfer object containing the files
@@ -134,69 +142,84 @@ async function getAllFiles(entries: any[]) {
 </script>
 
 <template>
-
-    <div class="container vertical" id="tweaker">
-        <div class="borderless-container" id="dropzone" :class="dragzone">
-            <input type="file" id="file-input" multiple webkitdirectory hidden @change="filesSelected">
-            <label for="file-input" @dragover="dragover" @dragleave="dragleave" @drop="filesDropped">Drop files here or
-                click on me</label>
-        </div>
-        <div id="button-list">
-            <button class="small-button" @click="">Encode all</button>
-            <button class="small-button" @click="">Encode selected</button>
-            <button class="small-button" @click="clearImagesPanel">Clear Selection</button>
-        </div>
-        <hr class="fw-hr">
-        <div class="container vertical">
-            <h3 id="c-h3" @click="expandCollapsedDiv">Encoding parameters</h3>
-            <div id="encoding-parameters" :style="{ 'max-height': epMaxHeight + 'px' }">
-                <div id="is-auto">
-                    <p>Auto?</p>
-                    <input type="checkbox" checked @change="checkboxAuto">
-                </div>
-                <div id="manual-parameters">
-                    <label for="mode-select">Choose mode: </label>
-                    <select id="mode-select" name="mode" :disabled=isAuto @change="selectMode">
-                        <option value=true>Lossless</option>
-                        <option value=false>Lossy</option>
-                    </select>
-                    <div id="left-right-panel">
-                        <div id="left-column" v-if="isLossless">
-                            <p>Z-Compression</p>
-                            <input id="z-compression" type="range" min="0" max="9" step="1" value="6" :disabled=isAuto @input="inputZCompression">
-                            <label for="z-compression">{{zCompression}}</label>
-                        </div>
-                        <div id="right-column" v-if="!isLossless">
-                            <p>Quality</p>
-                            <input id="quality" type="range" min="0" max="100" step="5" value="100" :disabled=isAuto @input="inputQuality">
-                            <label for="quality">{{quality}}</label>
+    <div class="container" id="workspace">
+        <div class="container vertical" id="tweaker">
+            <div class="borderless-container" id="dropzone" :class="dragzone">
+                <input type="file" id="file-input" multiple webkitdirectory hidden @change="filesSelected">
+                <label for="file-input" @dragover="dragover" @dragleave="dragleave" @drop="filesDropped">Drop files here
+                    or
+                    click on me</label>
+            </div>
+            <div id="button-list">
+                <button class="small-button" @click="">Encode all</button>
+                <button class="small-button" @click="">Encode selected</button>
+                <button class="small-button" @click="clearImagesPanel">Clear Selection</button>
+            </div>
+            <hr class="fw-hr">
+            <div class="container vertical">
+                <h3 class="n-h3 c-h3" @click="expandCollapsedDiv">Encoding parameters</h3>
+                <div id="encoding-parameters" :style="{ 'max-height': epMaxHeight + 'px' }">
+                    <div id="is-auto">
+                        <p>Auto?</p>
+                        <input type="checkbox" checked @change="checkboxAuto">
+                    </div>
+                    <div id="manual-parameters">
+                        <label for="mode-select">Choose mode: </label>
+                        <select id="mode-select" name="mode" :disabled=isAuto @change="selectMode">
+                            <option value=true>Lossless</option>
+                            <option value=false>Lossy</option>
+                        </select>
+                        <div id="left-right-panel">
+                            <div id="left-column" :hidden="!isLossless">
+                                <p>Z-Compression</p>
+                                <input id="z-compression" type="range" min="0" max="9" step="1" value="6"
+                                    :disabled=isAuto @input="inputZCompression">
+                                <label for="z-compression">{{ zCompression }}</label>
+                            </div>
+                            <div id="right-column" :hidden="isLossless">
+                                <p>Quality</p>
+                                <input id="quality" type="range" min="0" max="100" step="5" value="100" :disabled=isAuto
+                                    @input="inputQuality">
+                                <label for="quality">{{ quality }}</label>
+                                <p>Method</p>
+                                <input id="method " type="range" min="0" max="6" step="1" value="4" :disabled=isAuto
+                                    @input="inputMethod">
+                                <label for="method">{{ method }}</label>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!--Images Viewer-->
-    <div class="container" id="images-viewer">
-        <img v-for="image in imagesObjs" :src="image.fileURL" @click="loadImageToDetailedViewer">
-    </div>
-
-    <!--Detailed Viewer-->
-    <div class="container vertical" id="detailed-viewer">
-        <div v-if="hasDetailed">
-            <img :src="dImageObj.fileURL">
             <hr class="fw-hr">
-            <h3>Details</h3>
-            <div id="detailed-info-grid">
-                <p>Name: </p>
-                <p>{{ dImageObj.file.name }}</p>
-                <p>Type: </p>
-                <p>{{ dImageObj.file.type }}</p>
-                <p>Size: </p>
-                <p>{{ ((dImageObj.file.size) / 1024.0).toFixed(3) }} kB</p>
-                <p>L. M: </p>
-                <p>{{ new Date(dImageObj.file.lastModified) }}</p>
+            <div id="selected-images" class="container vertical" >
+                <h3 class="n-h3">Selected Images</h3>
+                <p>Press ctrl + mouse click to select images.</p>
+                <p v-if="selectedImages.length == 0">No images selected</p>
+                <p v-else>Selected images: {{ selectedImages.length }}</p>
+            </div>
+        </div>
+
+        <!--Images Viewer-->
+        <div class="container" id="images-viewer">
+            <img v-for="image in imagesObjs" :src="image.fileURL" @click="loadImageToDetailedViewer">
+        </div>
+
+        <!--Detailed Viewer-->
+        <div class="container vertical" id="detailed-viewer">
+            <div v-if="hasDetailed">
+                <img :src="dImageObj.fileURL">
+                <hr class="fw-hr">
+                <h3>Details</h3>
+                <div id="detailed-info-grid">
+                    <p>Name: </p>
+                    <p>{{ dImageObj.file.name }}</p>
+                    <p>Type: </p>
+                    <p>{{ dImageObj.file.type }}</p>
+                    <p>Size: </p>
+                    <p>{{ ((dImageObj.file.size) / 1024.0).toFixed(3) }} kB</p>
+                    <p>L. M: </p>
+                    <p>{{ new Date(dImageObj.file.lastModified) }}</p>
+                </div>
             </div>
         </div>
     </div>
@@ -213,6 +236,26 @@ async function getAllFiles(entries: any[]) {
 
 .fw-hr {
     width: 100%;
+}
+
+.n-h3 {
+    width: 100%;
+    margin: 0px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.c-h3 {
+    cursor: pointer;
+}
+
+/* ID */
+#workspace {
+    display: grid;
+    grid-template-columns: 1fr 1.8fr 1.2fr;
+    grid-column-gap: 10px;
+    margin-top: 10px;
+    width: auto;
 }
 
 #dropzone {
@@ -297,14 +340,6 @@ async function getAllFiles(entries: any[]) {
     text-align: left;
 }
 
-#c-h3 {
-    cursor: pointer;
-    width: 100%;
-    margin: 0px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-}
-
 #is-auto {
     display: flex;
     justify-content: start;
@@ -316,7 +351,8 @@ async function getAllFiles(entries: any[]) {
     display: flex;
     align-items: center;
 }
-#left-right-panel div{
+
+#left-right-panel div {
     flex-grow: 1;
 }
 </style>
