@@ -16,10 +16,15 @@ const isLossless = ref(true);
 const zCompression = ref(6);
 const quality = ref(80);
 const method = ref(4);
+const enParaText = ref('Encoding parameters ◄');
 
 const selectedImages: ImageObj[] = reactive([]);
 
-//TODO: Use an object to store the image details and update them reactively
+const selectedBorder = reactive({
+    margin: '2px',
+    border: '4px solid var(--image-border-color)'
+});
+
 
 const filesDropped = async (event: DragEvent) => {
     event.preventDefault();
@@ -72,6 +77,7 @@ const loadImageToDetailedViewer = (event: MouseEvent) => {
 const expandCollapsedDiv = (event: MouseEvent) => {
     const div = (event.target as HTMLElement).nextElementSibling as HTMLElement;
     epMaxHeight.value = epMaxHeight.value === 0 ? div.scrollHeight : 0;
+    enParaText.value = epMaxHeight.value === 0 ? 'Encoding parameters ◄' : 'Encoding parameters ▼';
 }
 
 const checkboxAuto = (event: Event) => {
@@ -97,6 +103,23 @@ const inputQuality = (event: Event) => {
 const inputMethod = (event: Event) => {
     const input = event.target as HTMLInputElement;
     method.value = Number(input.value);
+}
+
+const addToselectedImages = (event: Event) => {
+    const element = event.target as HTMLImageElement;
+    const clickedImage = imagesObjs.find(obj => obj.fileURL === element.src);
+    if (clickedImage) {
+        //TODO: Check if the image is already in the selectedImages array
+        if (selectedImages.includes(clickedImage)) {
+            selectedImages.splice(selectedImages.indexOf(clickedImage), 1);
+        } else selectedImages.push(clickedImage);
+        console.log(selectedImages);
+    }
+}
+
+const isImageSelected = (url: string) => {
+    const image = imagesObjs.find(obj => obj.fileURL === url);
+    return image !== undefined && selectedImages.includes(image);
 }
 
 /**
@@ -155,9 +178,13 @@ async function getAllFiles(entries: any[]) {
                 <button class="small-button" @click="">Encode selected</button>
                 <button class="small-button" @click="clearImagesPanel">Clear Selection</button>
             </div>
+            <div id="button-list">
+                <button v-if="imagesObjs.length!==0" class="small-button" @click="">Select all</button>
+                <button v-if="imagesObjs.length!==0" class="small-button" @click="">Deselect all</button>
+            </div>
             <hr class="fw-hr">
             <div class="container vertical">
-                <h3 class="n-h3 c-h3" @click="expandCollapsedDiv">Encoding parameters</h3>
+                <h3 class="n-h3 c-h3" @click="expandCollapsedDiv">{{ enParaText }}</h3>
                 <div id="encoding-parameters" :style="{ 'max-height': epMaxHeight + 'px' }">
                     <div id="is-auto">
                         <p>Auto?</p>
@@ -191,17 +218,20 @@ async function getAllFiles(entries: any[]) {
                 </div>
             </div>
             <hr class="fw-hr">
-            <div id="selected-images" class="container vertical" >
+            <div id="selected-images" class="container vertical">
                 <h3 class="n-h3">Selected Images</h3>
-                <p>Press ctrl + mouse click to select images.</p>
                 <p v-if="selectedImages.length == 0">No images selected</p>
                 <p v-else>Selected images: {{ selectedImages.length }}</p>
+                <p class="short-p">Press ctrl + mouse click to select images.</p>
+                <p class="short-p">Click again to deselect it.</p>
             </div>
         </div>
 
         <!--Images Viewer-->
         <div class="container" id="images-viewer">
-            <img v-for="image in imagesObjs" :src="image.fileURL" @click="loadImageToDetailedViewer">
+            <img v-for="image in imagesObjs" :src="image.fileURL" @click.ctrl="addToselectedImages"
+                @click.exact="loadImageToDetailedViewer" :style="isImageSelected(image.fileURL) ? selectedBorder : ''">
+
         </div>
 
         <!--Detailed Viewer-->
@@ -247,6 +277,10 @@ async function getAllFiles(entries: any[]) {
 
 .c-h3 {
     cursor: pointer;
+}
+
+.short-p {
+    margin: 5px 0 5px 0;
 }
 
 /* ID */
