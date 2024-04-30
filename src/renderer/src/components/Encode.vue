@@ -18,7 +18,6 @@ const isLossless = ref(true);
 const zCompression = ref(6);
 const quality = ref(80);
 const method = ref(4);
-
 const selectedBorder = reactive({
     margin: '2px',
     border: '4px solid var(--image-border-color)'
@@ -134,6 +133,27 @@ const deselectAll = () => {
 }
 
 /**
+ * Use cwebp to convert the images to webp format
+ * By default, the images is saved in the program directory under the 'output' folder
+ * TODO: Allow user to choose the output directory and default behavior
+ * 
+ * @param arr 
+ */
+const convertToWebp = (arr: ImageObj[]) =>{
+    // Extract the list of infos from the array of ImageObj
+    const infos = arr.map(obj => ({ path: obj.file.path, name: obj.file.name }));
+    
+    // Call the function to convert the images to webp
+    infos.forEach(info => {
+        const name = info.name.split('.').slice(0, -1).join('.');
+        const outputPath = './output/' + name + '.webp';
+        
+        //@ts-ignore (It is defined in preload.ts)
+        window.api.convertToWebp(info.path, outputPath);
+    });
+}
+
+/**
  * Read dropped files and directories
  * @param entries The DataTransfer object containing the files
  * @returns Array of files
@@ -189,8 +209,8 @@ async function getAllFiles(entries: any[]) {
                     click on me</label>
             </div>
             <div id="button-list">
-                <button class="small-button" @click="">Encode all</button>
-                <button class="small-button" @click="">Encode selected</button>
+                <button class="small-button" @click="convertToWebp(imagesObjs)">Encode all</button>
+                <button class="small-button" @click="convertToWebp(selectedImages)">Encode selected</button>
                 <button class="small-button" @click="clearImagesPanel">Clear All</button>
             </div>
             <div id="button-list">
