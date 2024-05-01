@@ -4,8 +4,16 @@ import { EncodingConstants as EC} from '../constants/number';
 
 <template>
     <div class="container" id="option-panel">
-        <p>Option: {{ EC.defaultQuality }} </p>
+        <p>Default Quality: {{ EC.defaultQuality }} </p>
+        <p>Default Compression Method: {{ EC.defaultMethod }}</p>
+        <p>Default Z-Compression: {{ EC.defaultZ }}</p>
     </div>
 </template>
 
-<style></style>
+<style>
+#option-panel {
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 10px;
+}
+</style>

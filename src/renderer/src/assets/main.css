@@ -60,6 +60,6 @@ button:hover {
     box-shadow: none;
 }
 
-.container .column-container {
+.column-container {
     flex-direction: column;
 }

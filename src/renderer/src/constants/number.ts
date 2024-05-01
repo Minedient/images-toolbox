@@ -1,5 +1,6 @@
 export const EncodingConstants = {
     defaultQuality: 80,
+    defaultMethod: 4,
     defaultZ: 6
 }
 

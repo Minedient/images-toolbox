@@ -21,7 +21,6 @@ const changePage = (page: string) => workspaceType.value = page;
         <button @click="changePage('Resize')">resize</button>
         <button @click="changePage('Rotate')">rotate</button>
         <button @click="changePage('Option')">option</button>
-        <button @click="changePage('About')">about</button>
         <button @click="changePage('Help')">help</button>
     </div>
 

@@ -3,10 +3,15 @@ import { onUpdated, ref } from 'vue';
 
 const props = defineProps({
     title: String,
+    type: {
+        type: String,
+        default: 'h3'
+    }
 });
 
 // Local states
 const maxHeight = ref(0);
+const type = ref(props.type);
 const composedTitle = ref(props.title + ' ◄');
 let toggled = false;
 
@@ -18,7 +23,7 @@ const onToggle = (event: MouseEvent) => {
     toggled = !toggled;
 
     maxHeight.value = calcMaxHeight(toggled, div);
-    composedTitle.value = toggled ? props.title + ' ◄' : props.title + ' ▼';
+    composedTitle.value = toggled ? props.title + ' ▼' : props.title + ' ◄';
 };
 
 /**
@@ -35,7 +40,7 @@ onUpdated(() => {
 
 <template>
     <div>
-        <h3 class="n-h3 c-h3" @click="onToggle">{{ composedTitle }}</h3>
+        <component :is="type" class="n-h3 c-h3" @click="onToggle">{{ composedTitle }}</component>
         <div class="collapsable" :style="{ 'max-height': maxHeight + 'px' }">
             <slot/>
         </div>
@@ -57,7 +62,6 @@ onUpdated(() => {
 .collapsable {
     transition: max-height 0.5s ease;
     overflow: hidden;
-    line-height: 0.3em;
     text-align: left;
 }
 </style>

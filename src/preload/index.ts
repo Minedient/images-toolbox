@@ -1,8 +1,9 @@
-import { contextBridge } from 'electron'
+import { contextBridge} from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import { CWebp } from 'cwebp';
 import path from 'path';
 import fs from 'fs';
+import { EncodeParameters } from '../renderer/src/classes/objects';
 
 // Custom APIs for renderer
 const api = {convertToWebp}
@@ -24,13 +25,33 @@ if (process.contextIsolated) {
   window.api = api
 }
 
-async function convertToWebp(inputPath: string, outputPath: string, params: Object){
+function isFileLossLess(inputPath: string): boolean {
+  const ext = path.extname(inputPath).toLowerCase();
+  return ext === '.png' || ext === '.bmp' || ext === '.tiff';
+}
+
+async function convertToWebp(inputPath: string, outputPath: string, params: EncodeParameters){
   console.log("Input received! ",inputPath, outputPath, params)
   console.log("Final path: ", uniqueFileName(outputPath))
   var cwebp = CWebp(inputPath, './dependencies/cwebp.exe');
   cwebp.multiThreading();
 
   // Process parameters
+  if(params.isAuto){
+    if(isFileLossLess(inputPath)){
+      cwebp.losslessPreset(params.zCompression);
+    } else {
+      cwebp.quality(params.quality);
+      cwebp.compression(params.method);
+    }
+  } else {
+    if(params.isLossless){
+      cwebp.losslessPreset(params.zCompression);
+    } else {
+      cwebp.quality(params.quality);
+      cwebp.compression(params.method);
+    }
+  }
 
   // Make sure the output directory exists
   const outputDir = path.dirname(outputPath);

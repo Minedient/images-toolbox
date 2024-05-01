@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import Collapsable from './Collapsable.vue';
+import { EncodeParameters } from '../classes/objects';
 
 interface ImageObj {
     file: File,
@@ -147,10 +148,16 @@ const convertToWebp = (arr: ImageObj[]) =>{
     infos.forEach(info => {
         const name = info.name.split('.').slice(0, -1).join('.');
         const outputPath = './output/' + name + '.webp';
-        
+        const parmas = new EncodeParameters(isAuto.value, isLossless.value, zCompression.value, quality.value, method.value);
+
         //@ts-ignore (It is defined in preload.ts)
-        window.api.convertToWebp(info.path, outputPath);
+        window.api.convertToWebp(info.path, outputPath, parmas);
     });
+}
+
+const openFolder = () => {
+    //@ts-ignore (It is defined in preload.ts)
+    window.electron.ipcRenderer.send('openOutputFolder');
 }
 
 /**
@@ -209,7 +216,7 @@ async function getAllFiles(entries: any[]) {
                     click on me</label>
             </div>
             <div id="button-list">
-                <button class="small-button" @click="convertToWebp(imagesObjs)">Encode all</button>
+                <button class="small-button" @click="openFolder">Open folder</button>
                 <button class="small-button" @click="convertToWebp(selectedImages)">Encode selected</button>
                 <button class="small-button" @click="clearImagesPanel">Clear All</button>
             </div>
@@ -255,9 +262,8 @@ async function getAllFiles(entries: any[]) {
             </div>
             <hr class="fw-hr">
             <div v-if="imagesObjs.length !== 0" id="selected-images" class="container vertical">
-                <h3 class="n-h3">Selected Images</h3>
-                <p v-if="selectedImages.length == 0">No images selected</p>
-                <p v-else>Selected images: {{ selectedImages.length }}</p>
+                <h3 v-if="selectedImages.length == 0">No images selected</h3>
+                <h3 v-else>Selected images: {{ selectedImages.length }}</h3>
                 <p class="short-p">Press ctrl + mouse click to select images.</p>
                 <p class="short-p">Ctrl + Click again to deselect it.</p>
             </div>

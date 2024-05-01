@@ -1,5 +1,5 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
+import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { WindowConstants as WC } from '../renderer/src/constants/number'
@@ -73,3 +73,6 @@ app.on('window-all-closed', () => {
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
+ipcMain.on('openOutputFolder', ()=>{
+  shell.openPath(path.join(app.getAppPath(), 'output'));
+})
