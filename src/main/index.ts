@@ -2,17 +2,26 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { WindowConstants as WC } from '../renderer/src/constants/number'
+import { WindowConstants as WC} from '../renderer/src/constants/number'
+import fs from 'fs';
+
+let mainWindow: BrowserWindow;
+
+const configPath = path.join(app.getAppPath(), 'config.json');
+// Load the config
+let config = JSON.parse(fs.readFileSync(configPath).toString());
 
 function createWindow(): void {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: WC.defaultWidth,
     height: WC.defaultHeight,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     }
@@ -53,6 +62,15 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
+  // Check if config.json exists, if not create it
+  if (!fs.existsSync(configPath)){
+    fs.writeFileSync(configPath, JSON.stringify({
+      "quality": 80,
+      "method": 4,
+      "zCompression": 6,
+    }));
+  }
+
   createWindow()
 
   app.on('activate', function () {
@@ -76,3 +94,20 @@ app.on('window-all-closed', () => {
 ipcMain.on('openOutputFolder', ()=>{
   shell.openPath(path.join(app.getAppPath(), 'output'));
 })
+
+// Load the config file and send it to the renderer
+ipcMain.on('loadConfig', ()=>{
+  config = JSON.parse(fs.readFileSync(configPath).toString());
+  mainWindow.webContents.send('configLoaded', config);
+})
+
+// Just send the config to the renderer
+// target is the window to send the config to
+ipcMain.on('getConfig', (event, target)=>{
+  console.log('Sending config to renderer: ', target);
+  mainWindow.webContents.send('configReturned', config);
+})
+
+ipcMain.on('saveConfig', (event, newConfig)=>{
+  fs.writeFileSync(configPath, newConfig);
+});

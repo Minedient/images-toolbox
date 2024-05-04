@@ -1,12 +1,15 @@
-import { contextBridge} from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import { CWebp } from 'cwebp';
+import { EncodeParameters } from '../renderer/src/classes/objects';
 import path from 'path';
 import fs from 'fs';
-import { EncodeParameters } from '../renderer/src/classes/objects';
 
 // Custom APIs for renderer
-const api = {convertToWebp}
+const api = { convertToWebp, sendToMain, recevieFromMain}
+
+const toMainCommands = ['openOutputFolder', 'loadConfig', 'saveConfig', 'getConfig'];
+const fromMainCommands = ['configLoaded', 'configSaved', 'configReturned'];
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
@@ -30,22 +33,44 @@ function isFileLossLess(inputPath: string): boolean {
   return ext === '.png' || ext === '.bmp' || ext === '.tiff';
 }
 
-async function convertToWebp(inputPath: string, outputPath: string, params: EncodeParameters){
-  console.log("Input received! ",inputPath, outputPath, params)
+/**
+ * This act as a bridge to send messages to the main process from the renderer
+ * @param channel The name of the channel/command to send
+ * @param args The arguments
+ */
+function sendToMain(channel: string, ...args: any[]) {
+  if (toMainCommands.includes(channel)) {
+    ipcRenderer.send(channel, ...args);
+  }
+}
+
+/**
+ * This act as a bridge to receive messages from the main process in the renderer
+ * @param channel The name of the channel/command to receive from
+ * @param callback The callback function
+ */
+function recevieFromMain(channel: string, callback: Function) {
+  if (fromMainCommands.includes(channel)) {
+    ipcRenderer.on(channel, (_, ...args) => callback(...args));
+  }
+}
+
+async function convertToWebp(inputPath: string, outputPath: string, params: EncodeParameters) {
+  console.log("Input received! ", inputPath, outputPath, params)
   console.log("Final path: ", uniqueFileName(outputPath))
   var cwebp = CWebp(inputPath, './dependencies/cwebp.exe');
   cwebp.multiThreading();
 
   // Process parameters
-  if(params.isAuto){
-    if(isFileLossLess(inputPath)){
+  if (params.isAuto) {
+    if (isFileLossLess(inputPath)) {
       cwebp.losslessPreset(params.zCompression);
     } else {
       cwebp.quality(params.quality);
       cwebp.compression(params.method);
     }
   } else {
-    if(params.isLossless){
+    if (params.isLossless) {
       cwebp.losslessPreset(params.zCompression);
     } else {
       cwebp.quality(params.quality);
@@ -55,7 +80,7 @@ async function convertToWebp(inputPath: string, outputPath: string, params: Enco
 
   // Make sure the output directory exists
   const outputDir = path.dirname(outputPath);
-  if (!fs.existsSync(outputDir)){
+  if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir);
   }
 
@@ -75,7 +100,7 @@ function uniqueFileName(originalPath: string): string {
   const base = path.basename(originalPath, ext);
   let finalPath = originalPath;
   let i = 1;
-  while(fs.existsSync(finalPath)){
+  while (fs.existsSync(finalPath)) {
     finalPath = path.join(directory, `${base}-${i}${ext}`);
     i++;
   }

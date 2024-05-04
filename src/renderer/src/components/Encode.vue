@@ -2,11 +2,15 @@
 import { reactive, ref } from 'vue';
 import Collapsable from './Collapsable.vue';
 import { EncodeParameters } from '../classes/objects';
+import { useRunTimeParameters } from '../classes/objects';
 
 interface ImageObj {
     file: File,
     fileURL: string
 }
+
+// Use pinia to store the runtime parameters
+const runTimeParameters = useRunTimeParameters();
 
 const dragzone = ref('');
 const imagesObjs: ImageObj[] = reactive([]);
@@ -14,6 +18,11 @@ const hasDetailed = ref(false);
 const dImageObj = reactive(<ImageObj>{});
 const selectedImages: ImageObj[] = reactive([]);
 
+const currentlyEncoding = ref(false);
+const encodingProgress = ref(0);
+const encodeFinished = ref(false);
+
+// Runtime variables
 const isAuto = ref(true);
 const isLossless = ref(true);
 const zCompression = ref(6);
@@ -23,7 +32,6 @@ const selectedBorder = reactive({
     margin: '2px',
     border: '4px solid var(--image-border-color)'
 });
-
 
 const filesDropped = async (event: DragEvent) => {
     event.preventDefault();
@@ -141,6 +149,8 @@ const deselectAll = () => {
  * @param arr 
  */
 const convertToWebp = (arr: ImageObj[]) =>{
+    currentlyEncoding.value = true;
+
     // Extract the list of infos from the array of ImageObj
     const infos = arr.map(obj => ({ path: obj.file.path, name: obj.file.name }));
     
@@ -151,13 +161,26 @@ const convertToWebp = (arr: ImageObj[]) =>{
         const parmas = new EncodeParameters(isAuto.value, isLossless.value, zCompression.value, quality.value, method.value);
 
         //@ts-ignore (It is defined in preload.ts)
-        window.api.convertToWebp(info.path, outputPath, parmas);
+        // Convert the image to webp and update the progress bar
+        window.api.convertToWebp(info.path, outputPath, parmas).then(()=>{
+            encodingProgress.value++;
+
+            // If all images are encoded, show a 'Finished!' text and disappear with animation after 3 seconds
+            if(encodingProgress.value === infos.length){
+                encodeFinished.value = true;    // Show the 'Finished!' text
+                setTimeout(() => {
+                    encodeFinished.value = false;
+                    currentlyEncoding.value = false;
+                    encodingProgress.value = 0;
+                }, 3000);
+            }
+        });
     });
 }
 
 const openFolder = () => {
     //@ts-ignore (It is defined in preload.ts)
-    window.electron.ipcRenderer.send('openOutputFolder');
+    window.api.sendToMain('openOutputFolder');
 }
 
 /**
@@ -205,7 +228,11 @@ async function getAllFiles(entries: any[]) {
 <template>
     <!--Create a temporary div here during encoding to show the progress bar, when fished. Show a 'Finished!' text and disappear with animation after 3 seconds-->
     <!--TODO-->
-
+    <div id="encode-related">
+        <p v-if="currentlyEncoding && !encodeFinished">Encoding...{{ encodingProgress }}/{{ selectedImages.length }}</p>
+        <p v-else-if="encodeFinished">Finished!</p>
+        <progress v-if:="currentlyEncoding" id="encoding-progress" :value="encodingProgress" :max="selectedImages.length"></progress></div>
+    
     <div class="container" id="workspace">
         <!--Tweaker and Infos-->
         <div class="container vertical" id="tweaker">
@@ -242,6 +269,7 @@ async function getAllFiles(entries: any[]) {
                         <div id="left-right-panel">
                             <div id="left-column" :hidden="!isLossless">
                                 <p>Z-Compression</p>
+                                <!--TODO rewrite the value to reflect default value set by config.json-->
                                 <input id="z-compression" type="range" min="0" max="9" step="1" value="6"
                                     :disabled=isAuto @input="inputZCompression">
                                 <label for="z-compression">{{ zCompression }}</label>
@@ -325,6 +353,20 @@ async function getAllFiles(entries: any[]) {
 }
 
 /* ID */
+#encode-related {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+}
+#encode-related p {
+    margin-top: 10px;
+    margin-bottom: 0px
+}
+#encoding-progress {
+    width: 100%;
+    height: 20px;
+    margin-top: 10px;
+}
+
 #workspace {
     display: grid;
     grid-template-columns: 1fr 1.8fr 1.2fr;

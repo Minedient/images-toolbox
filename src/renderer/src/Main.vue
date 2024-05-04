@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import Encode from './components/Encode.vue';
 import Option from './components/Option.vue';
 import Help from './components/Help.vue';
+import { useRunTimeParameters } from './classes/objects';
 const buttonList = ref('buttonList');
 const workspaceType = ref('Encode');
 const workspaces = {
@@ -13,6 +14,18 @@ const workspaces = {
 // Functions
 const changePage = (page: string) => workspaceType.value = page;
 
+// The code below is used to set a store that allow parameters 
+// to be shared between components.
+const runTimeParameters = useRunTimeParameters();
+
+//@ts-ignore (It is defined in preload.ts)
+window.api.recevieFromMain('configReturned', (data) => {
+    runTimeParameters.quality = data.quality;
+    runTimeParameters.method = data.method;
+    runTimeParameters.zCompression = data.zCompression;
+});
+//@ts-ignore (It is defined in preload.ts)
+window.api.sendToMain('getConfig', 'main');
 </script>
 
 <template>
