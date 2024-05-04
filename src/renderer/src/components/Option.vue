@@ -1,25 +1,11 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
 import { EncodingConstants as EC } from '../constants/number';
 import { useRunTimeParameters } from '../classes/objects';
 
 const runTimeParameters = useRunTimeParameters();
-const config = reactive({
-    quality: 0,
-    method: 0,
-    zCompression: 0
-});
-
-// Set it 
-config.quality = runTimeParameters.quality;
-config.method = runTimeParameters.method;
-config.zCompression = runTimeParameters.zCompression;
 
 //@ts-ignore (It is defined in preload.ts)
 window.api.recevieFromMain('configReturned', (data) => {
-    config.quality = data.quality;
-    config.method = data.method;
-    config.zCompression = data.zCompression;
     runTimeParameters.quality = data.quality;
     runTimeParameters.method = data.method;
     runTimeParameters.zCompression = data.zCompression;
@@ -32,31 +18,35 @@ const loadConfig = () => {
 
 const saveConfig = () => {
     //@ts-ignore (It is defined in preload.ts)
-    window.api.sendToMain('saveConfig', JSON.stringify(config));
+    window.api.sendToMain('saveConfig', JSON.stringify({
+        quality: runTimeParameters.quality,
+        method: runTimeParameters.method,
+        zCompression: runTimeParameters.zCompression
+    }));
 }
 
 const qualityBarChange = (event: Event) => {
     const target = event.target as HTMLInputElement;
-    config.quality = parseInt(target.value);
+    runTimeParameters.quality = parseInt(target.value);
 }
 
 const methodBarChange = (event: Event) => {
     const target = event.target as HTMLInputElement;
-    config.method = parseInt(target.value);
+    runTimeParameters.method = parseInt(target.value);
 }
 
 const zBarChange = (event: Event) => {
     const target = event.target as HTMLInputElement;
-    config.zCompression = parseInt(target.value);
+    runTimeParameters.zCompression = parseInt(target.value);
 }
 
 /**
  * Load from EC and do a save/load cycle 
  */
 const resetToDefault = () => {
-    config.quality = EC.defaultQuality;
-    config.method = EC.defaultMethod;
-    config.zCompression = EC.defaultZ;
+    runTimeParameters.quality = EC.defaultQuality;
+    runTimeParameters.method = EC.defaultMethod;
+    runTimeParameters.zCompression = EC.defaultZ;
     saveConfig();
     loadConfig();
     showNotification('Reset to default parameters!');
@@ -81,12 +71,12 @@ const showNotification = (message) => {
             <button>Setting</button>
         </div>
         <div class="container" id="option-panel">
-            <p>Quality: {{ config.quality }}</p>
-            <p>Current Compression Method: {{ config.method }}</p>
-            <p>Current Z-Compression: {{ config.zCompression }}</p>
-            <input @input="qualityBarChange" id="qualityBar" type="range" min="0" max="100" step="5" :value="config.quality">
-            <input @input="methodBarChange" id="methodBar" type="range" min="0" max="6" step="1" :value="config.method">
-            <input @input="zBarChange" id="zBar" type="range" min="0" max="9" step="1" :value="config.zCompression">
+            <p>Quality: {{ runTimeParameters.quality }}</p>
+            <p>Current Compression Method: {{ runTimeParameters.method }}</p>
+            <p>Current Z-Compression: {{ runTimeParameters.zCompression }}</p>
+            <input @input="qualityBarChange" id="qualityBar" type="range" min="0" max="100" step="5" :value="runTimeParameters.quality">
+            <input @input="methodBarChange" id="methodBar" type="range" min="0" max="6" step="1" :value="runTimeParameters.method">
+            <input @input="zBarChange" id="zBar" type="range" min="0" max="9" step="1" :value="runTimeParameters.zCompression">
             <button @click="saveConfig(); showNotification('Setting Saved!');">Save</button>
             <button @click="resetToDefault">Reset To Default</button>
         </div>
