@@ -11,6 +11,11 @@ interface ImageObj {
 
 // Use pinia to store the runtime parameters
 const runTimeParameters = useRunTimeParameters();
+const runTimeChanges = runTimeParameters.$subscribe((_mutation, state) => {
+    zCompression.value = state.zCompression;
+    quality.value = state.quality;
+    method.value = state.method;
+});
 
 const dragzone = ref('');
 const imagesObjs: ImageObj[] = reactive([]);
@@ -18,6 +23,7 @@ const hasDetailed = ref(false);
 const dImageObj = reactive(<ImageObj>{});
 const selectedImages: ImageObj[] = reactive([]);
 
+// Encoding States
 const currentlyEncoding = ref(false);
 const encodingProgress = ref(0);
 const encodeFinished = ref(false);
@@ -25,9 +31,9 @@ const encodeFinished = ref(false);
 // Runtime variables
 const isAuto = ref(true);
 const isLossless = ref(true);
-const zCompression = ref(6);
-const quality = ref(80);
-const method = ref(4);
+const zCompression = ref(0);
+const quality = ref(0);
+const method = ref(0);
 const selectedBorder = reactive({
     margin: '2px',
     border: '4px solid var(--image-border-color)'
@@ -270,17 +276,17 @@ async function getAllFiles(entries: any[]) {
                             <div id="left-column" :hidden="!isLossless">
                                 <p>Z-Compression</p>
                                 <!--TODO rewrite the value to reflect default value set by config.json-->
-                                <input id="z-compression" type="range" min="0" max="9" step="1" value="6"
+                                <input id="z-compression" type="range" min="0" max="9" step="1" :value="zCompression"
                                     :disabled=isAuto @input="inputZCompression">
                                 <label for="z-compression">{{ zCompression }}</label>
                             </div>
                             <div id="right-column" :hidden="isLossless">
                                 <p>Quality</p>
-                                <input id="quality" type="range" min="0" max="100" step="5" value="100" :disabled=isAuto
+                                <input id="quality" type="range" min="0" max="100" step="5" :value="quality" :disabled=isAuto
                                     @input="inputQuality">
                                 <label for="quality">{{ quality }}</label>
                                 <p>Method</p>
-                                <input id="method " type="range" min="0" max="6" step="1" value="4" :disabled=isAuto
+                                <input id="method " type="range" min="0" max="6" step="1" :value="method" :disabled=isAuto
                                     @input="inputMethod">
                                 <label for="method">{{ method }}</label>
                             </div>

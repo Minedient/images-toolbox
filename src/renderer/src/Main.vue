@@ -31,8 +31,8 @@ window.api.sendToMain('getConfig', 'main');
 <template>
     <div :class="buttonList">
         <button @click="changePage('Encode')">encode</button>
-        <button @click="changePage('Resize')">resize</button>
-        <button @click="changePage('Rotate')">rotate</button>
+        <!--button @click="changePage('Resize')">resize</button>
+        <button @click="changePage('Rotate')">rotate</button -->
         <button @click="changePage('Option')">option</button>
         <button @click="changePage('Help')">help</button>
     </div>

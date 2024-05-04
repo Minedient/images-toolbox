@@ -6,6 +6,10 @@ const props = defineProps({
     type: {
         type: String,
         default: 'h3'
+    },
+    static: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -23,6 +27,7 @@ const onToggle = (event: MouseEvent) => {
     toggled = !toggled;
 
     maxHeight.value = calcMaxHeight(toggled, div);
+        console.log(maxHeight.value)
     composedTitle.value = toggled ? props.title + ' ▼' : props.title + ' ◄';
 };
 
@@ -31,9 +36,11 @@ const onToggle = (event: MouseEvent) => {
  * Useful for div that changes it content dynamically
  */
 onUpdated(() => {
+    if (props.static) return;
     const div = document.querySelector('.collapsable') as HTMLElement;
     if (div) {
         maxHeight.value = calcMaxHeight(toggled, div);
+        console.log(maxHeight.value)
     }
 });
 </script>
