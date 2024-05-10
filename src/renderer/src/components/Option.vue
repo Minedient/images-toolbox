@@ -9,7 +9,6 @@ const quality = ref(runTimeParameters.quality);
 const method = ref(runTimeParameters.method);
 const zCompression = ref(runTimeParameters.zCompression);
 
-
 const loadConfig = () => {
     //@ts-ignore (It is defined in preload.ts)
     window.api.sendToMain('loadConfig');
@@ -70,8 +69,9 @@ const showNotification = (message) => {
     <div class="container" id="holder">
         <div class="container column-container" style="gap:10px">
             <button>Encoding</button>
+            <button>Setting</button>
         </div>
-        <div class="container" id="option-panel">
+        <div class="container" id="encode-option-panel">
             <p>Quality: {{ quality }}</p>
             <p>Current Compression Method: {{ method }}</p>
             <p>Current Z-Compression: {{ zCompression }}</p>
@@ -110,7 +110,7 @@ const showNotification = (message) => {
     gap: 10px;
 }
 
-#option-panel {
+#encode-option-panel {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 10px;

@@ -1,6 +1,17 @@
 <script setup lang="ts">
 import { onUpdated, ref } from 'vue';
 
+/**
+ * Properties of the collapsable component
+ * @param {String} title The title of the collapsable component
+ * @param {Boolean} static If the collapsable component is static
+ *                         Static collapsable component will not change its height
+ *                         when the content is updated
+ * @param {Boolean} externalTrigger If the collapsable component is triggered by an external event
+ * @param {Boolean} trigger The trigger that it looks for. Only works if externalTrigger is true
+ * TODO: Do the external trigger
+ * 
+ */
 const props = defineProps({
     title: String,
     type: {
@@ -8,6 +19,14 @@ const props = defineProps({
         default: 'h3'
     },
     static: {
+        type: Boolean,
+        default: false
+    },
+    externalTrigger: {
+        type: Boolean,
+        default: false
+    },
+    trigger: {
         type: Boolean,
         default: false
     }
