@@ -2,6 +2,7 @@
 import { EncodingConstants as EC } from '../constants/number';
 import { useRunTimeParameters } from '../classes/objects';
 import { ref } from 'vue';
+import Foldable from './Foldable.vue';
 
 // THE parameters that shared between Components
 const runTimeParameters = useRunTimeParameters();
@@ -65,31 +66,57 @@ const showNotification = (message) => {
 }
 </script>
 
+<!-- Implement the exclusive option panel using Foldable and buttons
+    to switch between different options 
+    -When the button is clicked, the corresponding option panel will be shown
+    -Encoding => Encoding options
+    -Setting => Setting options
+-->
 <template>
     <div class="container" id="holder">
         <div class="container column-container" style="gap:10px">
             <button>Encoding</button>
             <button>Setting</button>
         </div>
-        <div class="container" id="encode-option-panel">
-            <p>Quality: {{ quality }}</p>
-            <p>Current Compression Method: {{ method }}</p>
-            <p>Current Z-Compression: {{ zCompression }}</p>
-            <input @input="qualityBarChange" id="qualityBar" type="range" min="0" max="100" step="5" :value="quality">
-            <input @input="methodBarChange" id="methodBar" type="range" min="0" max="6" step="1" :value="method">
-            <input @input="zBarChange" id="zBar" type="range" min="0" max="9" step="1" :value="zCompression">
-            <button @click="saveConfig(); showNotification('Setting Saved!');">Save</button>
-            <button @click="resetToDefault">Reset To Default</button>
+        <div class="container">
+            <Foldable init external-only>
+                <div id="encode-option-panel">
+                    <p>Quality: {{ quality }}</p>
+                    <p>Current Compression Method: {{ method }}</p>
+                    <p>Current Z-Compression: {{ zCompression }}</p>
+                    <input @input="qualityBarChange" id="qualityBar" type="range" min="0" max="100" step="5"
+                        :value="quality">
+                    <input @input="methodBarChange" id="methodBar" type="range" min="0" max="6" step="1"
+                        :value="method">
+                    <input @input="zBarChange" id="zBar" type="range" min="0" max="9" step="1" :value="zCompression">
+                    <button @click="saveConfig(); showNotification('Setting Saved!');">Save</button>
+                    <button @click="resetToDefault">Reset To Default</button>
+                </div>
+            </Foldable>
+            <Foldable external-only>
+
+            </Foldable>
         </div>
+
+
     </div>
 </template>
 
 <style>
-@keyframes fade{
-    0%, 100%{opacity:0;}
-    33%, 67%{opacity:1;}
+@keyframes fade {
+
+    0%,
+    100% {
+        opacity: 0;
+    }
+
+    33%,
+    67% {
+        opacity: 1;
+    }
 
 }
+
 .notification {
     position: fixed;
     width: 280px;
@@ -103,6 +130,7 @@ const showNotification = (message) => {
     font-size: 1.5em;
     animation: fade 3s;
 }
+
 #holder {
     display: grid;
     grid-template-columns: 1fr 10fr;

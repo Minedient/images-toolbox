@@ -1,5 +1,34 @@
+<!--Collapsable.vue Create component for a collapsable container
+    Usage: <Collapsable>...</Collapsable>
+    Props:
+        title: String, the title of the collapsable component (required)
+        type: String, the type of the title, default to 'h3'
+        static: Boolean, if the collapsable component is static
+                Static collapsable component will not change its height
+                when the content is updated
+        externalTrigger: Boolean, if the collapsable component is triggered by an external event
+
+    When using externalTrigger, the parent component should create a reference to the component,
+    and call the toggle function to toggle the collapsable component
+    Example:
+    <template>
+        <Collapsable title="Resize" type="h2" static externalTrigger>
+            <p>
+                Resize images to a specific width and height.
+            </p>
+        </Collapsable>
+    </template>
+    <script setup>
+        import { ref } from 'vue';
+        const resizeCollapsable = ref(null);
+        resizeCollapsable.value?.toggle();
+    </script>
+-->
 <script setup lang="ts">
 import { onUpdated, ref } from 'vue';
+
+// Get a reference to the clickable component
+const thisTag = ref(null as HTMLElement | null);
 
 /**
  * Properties of the collapsable component
@@ -8,9 +37,6 @@ import { onUpdated, ref } from 'vue';
  *                         Static collapsable component will not change its height
  *                         when the content is updated
  * @param {Boolean} externalTrigger If the collapsable component is triggered by an external event
- * @param {Boolean} trigger The trigger that it looks for. Only works if externalTrigger is true
- * TODO: Do the external trigger
- * 
  */
 const props = defineProps({
     title: String,
@@ -25,12 +51,17 @@ const props = defineProps({
     externalTrigger: {
         type: Boolean,
         default: false
-    },
-    trigger: {
-        type: Boolean,
-        default: false
     }
 });
+
+// Expose the toggle function to the parent component
+// Only works if the externalTrigger is set to true
+defineExpose({ toggle })
+
+function toggle() {
+    if (!props.externalTrigger) return;
+    thisTag.value?.click();
+}
 
 // Local states
 const maxHeight = ref(0);
@@ -39,14 +70,12 @@ const composedTitle = ref(props.title + ' ◄');
 let toggled = false;
 
 const calcMaxHeight = (state: boolean, div: HTMLElement) => state ? div.scrollHeight : 0;
-
 const onToggle = (event: MouseEvent) => {
     const div = (event.target as HTMLElement).nextElementSibling as HTMLElement;
 
     toggled = !toggled;
 
     maxHeight.value = calcMaxHeight(toggled, div);
-        console.log(maxHeight.value)
     composedTitle.value = toggled ? props.title + ' ▼' : props.title + ' ◄';
 };
 
@@ -65,11 +94,9 @@ onUpdated(() => {
 </script>
 
 <template>
-    <div>
-        <component :is="type" class="n-h3 c-h3" @click="onToggle">{{ composedTitle }}</component>
-        <div class="collapsable" :style="{ 'max-height': maxHeight + 'px' }">
-            <slot/>
-        </div>
+    <component :is="type" class="n-h3 c-h3" @click="onToggle" ref="thisTag">{{ composedTitle }}</component>
+    <div class="collapsable" :style="{ 'max-height': maxHeight + 'px' }">
+        <slot />
     </div>
 </template>
 

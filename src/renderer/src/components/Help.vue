@@ -58,7 +58,7 @@
                     For more information, please refer to the <a href="https://developers.google.com/speed/webp/docs/cwebp" target="_blank">Google WebP documentation</a>.
                 </p>
             </Collapsable>
-            <Collapsable title="Resize" type="h2" static>
+            <Collapsable title="Resize" type="h2" static externalTrigger>
                 <p>
                     Resize images to a specific width and height. <-- this is not yet implemented
                 </p>
