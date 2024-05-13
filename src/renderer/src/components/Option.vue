@@ -9,6 +9,13 @@ const runTimeParameters = useRunTimeParameters();
 const quality = ref(runTimeParameters.quality);
 const method = ref(runTimeParameters.method);
 const zCompression = ref(runTimeParameters.zCompression);
+const encode = ref(null as typeof Foldable | null);
+const setting = ref(null as typeof Foldable | null);
+
+const pageStates = ref({
+    encode: true,
+    setting: false
+});
 
 const loadConfig = () => {
     //@ts-ignore (It is defined in preload.ts)
@@ -64,6 +71,28 @@ const showNotification = (message) => {
         document.body.removeChild(notification);
     }, 3000);
 }
+const changeState = (page: string) => {
+    pageStates.value[page] = !pageStates.value[page];
+    switch (page) {
+        case 'encode':
+            encode.value?.toggle();
+            break;
+        case 'setting':
+            setting.value?.toggle();
+            break;
+        default:
+            break;
+    }
+}
+const switchPages = (page: string) => {
+    //if the page is already shown, do nothing
+    if (pageStates.value[page]) return;
+
+    // Find the current page and hide it
+    const currentPage = Object.keys(pageStates.value).find(key => pageStates.value[key]) || '';
+    changeState(currentPage);
+    changeState(page);
+}
 </script>
 
 <!-- Implement the exclusive option panel using Foldable and buttons
@@ -75,11 +104,11 @@ const showNotification = (message) => {
 <template>
     <div class="container" id="holder">
         <div class="container column-container" style="gap:10px">
-            <button>Encoding</button>
-            <button>Setting</button>
+            <button @click="switchPages('encode')">Encoding</button>
+            <button @click="switchPages('setting')">Setting</button>
         </div>
-        <div class="container">
-            <Foldable init external-only>
+        <div class="container" style="flex-direction: column;">
+            <Foldable init external-only ref="encode">
                 <div id="encode-option-panel">
                     <p>Quality: {{ quality }}</p>
                     <p>Current Compression Method: {{ method }}</p>
@@ -93,12 +122,12 @@ const showNotification = (message) => {
                     <button @click="resetToDefault">Reset To Default</button>
                 </div>
             </Foldable>
-            <Foldable external-only>
-
+            <Foldable external-only ref="setting">
+                <div id="setting-option-panel">
+                    <!-- Add contents -->
+                </div>
             </Foldable>
         </div>
-
-
     </div>
 </template>
 

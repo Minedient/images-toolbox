@@ -33,7 +33,12 @@
 -->
 <script setup lang="ts">
 import { onMounted, onUpdated, ref } from 'vue';
+import { calcMaxHeight } from '../classes/func';
 
+let toggled = false;
+
+// Constants
+const maxHeight = ref(0)
 const thisTag = ref(null as HTMLElement | null)
 const props = defineProps({
     static: {
@@ -54,29 +59,25 @@ const props = defineProps({
     }
 
 })
-
-
-let toggled = false;
-const maxHeight = ref(0)
-const calcMaxHeight = (state: boolean, div: HTMLElement) => {
-    return state ? div.scrollHeight : 0
-}
+// Functions
 const valueChange = (div: HTMLElement) => {
     toggled = !toggled
     maxHeight.value = calcMaxHeight(toggled, div);
 }
-const toggle = () => {
-    if (!props.external || !props.externalOnly) return;
-    valueChange(thisTag.value as HTMLElement);
-}
 const getState = () => {
     return toggled;
+}
+const toggle = () => {
+    if (!props.external && !props.externalOnly) return;
+    valueChange(thisTag.value as HTMLElement);
 }
 const onToggle = (event: MouseEvent) => {
     if (props.externalOnly) return;
     valueChange(event.target as HTMLElement);
 }
-
+/**
+ * Vue lifecycle hooks
+ */
 onUpdated(() => {
     if (props.static) return
     const div = thisTag.value;

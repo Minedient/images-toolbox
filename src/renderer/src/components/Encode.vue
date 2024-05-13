@@ -9,9 +9,8 @@ interface ImageObj {
     fileURL: string
 }
 
-// Use pinia to store the runtime parameters
-const runTimeParameters = useRunTimeParameters();
-const runTimeChanges = runTimeParameters.$subscribe((_mutation, state) => {
+// Use pinia to keep check on the runtime parameters
+useRunTimeParameters().$subscribe((_mutation, state) => {
     zCompression.value = state.zCompression;
     quality.value = state.quality;
     method.value = state.method;

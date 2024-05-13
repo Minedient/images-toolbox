@@ -26,6 +26,7 @@
 -->
 <script setup lang="ts">
 import { onUpdated, ref } from 'vue';
+import { calcMaxHeight } from '../classes/func';
 
 // Get a reference to the clickable component
 const thisTag = ref(null as HTMLElement | null);
@@ -69,7 +70,6 @@ const type = ref(props.type);
 const composedTitle = ref(props.title + ' ◄');
 let toggled = false;
 
-const calcMaxHeight = (state: boolean, div: HTMLElement) => state ? div.scrollHeight : 0;
 const onToggle = (event: MouseEvent) => {
     const div = (event.target as HTMLElement).nextElementSibling as HTMLElement;
 
@@ -88,7 +88,6 @@ onUpdated(() => {
     const div = document.querySelector('.collapsable') as HTMLElement;
     if (div) {
         maxHeight.value = calcMaxHeight(toggled, div);
-        console.log(maxHeight.value)
     }
 });
 </script>
