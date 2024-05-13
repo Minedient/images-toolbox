@@ -26,6 +26,8 @@ $ npm run dev
 
 ### Build
 
+Currently, the transcode functionality only works in Window enviornment as ONLY cwebp binary for window is included.
+
 ```bash
 # For windows
 $ npm run build:win
