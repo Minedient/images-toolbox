@@ -94,13 +94,6 @@ const switchPages = (page: string) => {
     changeState(page);
 }
 </script>
-
-<!-- Implement the exclusive option panel using Foldable and buttons
-    to switch between different options 
-    -When the button is clicked, the corresponding option panel will be shown
-    -Encoding => Encoding options
-    -Setting => Setting options
--->
 <template>
     <div class="container" id="holder">
         <div class="container column-container" style="gap:10px">
