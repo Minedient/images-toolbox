@@ -54,7 +54,7 @@ const filesSelected = async (event: Event) => {
     (files ? [...files].filter(file => file.type.startsWith('image/')) : []).forEach(file => {
         imagesObjs.push({ file: file, fileURL: URL.createObjectURL(file) })
     });
-    
+
     //Ensure the input is cleared so that the same files can be selected again and trigger the change event correctly
     target.value = '';
 }
@@ -153,12 +153,12 @@ const deselectAll = () => {
  * 
  * @param arr 
  */
-const convertToWebp = (arr: ImageObj[]) =>{
+const convertToWebp = (arr: ImageObj[]) => {
     currentlyEncoding.value = true;
 
     // Extract the list of infos from the array of ImageObj
     const infos = arr.map(obj => ({ path: obj.file.path, name: obj.file.name }));
-    
+
     // Call the function to convert the images to webp
     infos.forEach(info => {
         const name = info.name.split('.').slice(0, -1).join('.');
@@ -167,11 +167,11 @@ const convertToWebp = (arr: ImageObj[]) =>{
 
         //@ts-ignore (It is defined in preload.ts)
         // Convert the image to webp and update the progress bar
-        window.api.convertToWebp(info.path, outputPath, parmas).then(()=>{
+        window.api.convertToWebp(info.path, outputPath, parmas).then(() => {
             encodingProgress.value++;
 
             // If all images are encoded, show a 'Finished!' text and disappear with animation after 3 seconds
-            if(encodingProgress.value === infos.length){
+            if (encodingProgress.value === infos.length) {
                 encodeFinished.value = true;    // Show the 'Finished!' text
                 setTimeout(() => {
                     encodeFinished.value = false;
@@ -236,14 +236,17 @@ async function getAllFiles(entries: any[]) {
     <div id="encode-related">
         <p v-if="currentlyEncoding && !encodeFinished">Encoding...{{ encodingProgress }}/{{ selectedImages.length }}</p>
         <p v-else-if="encodeFinished">Finished!</p>
-        <progress v-if:="currentlyEncoding" id="encoding-progress" :value="encodingProgress" :max="selectedImages.length"></progress></div>
-    
+        <progress v-if:="currentlyEncoding" id="encoding-progress" :value="encodingProgress"
+            :max="selectedImages.length"></progress>
+    </div>
+
     <div class="container" id="workspace">
         <!--Tweaker and Infos-->
         <div class="container vertical" id="tweaker">
             <div class="borderless-container" id="dropzone" :class="dragzone">
                 <input type="file" id="file-input" multiple webkitdirectory hidden @change="filesSelected">
-                <label for="file-input" @dragover="dragover" @dragleave="dragleave" @drop="filesDropped">Drop files here
+                <label for="file-input" @dragover="dragover" @dragleave="dragleave" @drop="filesDropped">Drop files
+                    here
                     or
                     click on me</label>
             </div>
@@ -254,7 +257,8 @@ async function getAllFiles(entries: any[]) {
             </div>
             <div id="button-list">
                 <button v-if="imagesObjs.length !== 0" class="small-button" @click="selectAll">Select all</button>
-                <button v-if="imagesObjs.length !== 0" class="small-button" @click="deselectAll">Deselect all</button>
+                <button v-if="imagesObjs.length !== 0" class="small-button" @click="deselectAll">Deselect
+                    all</button>
             </div>
             <hr class="fw-hr">
             <p class="short-p">Total number of images: {{ imagesObjs.length }}</p>
@@ -281,12 +285,12 @@ async function getAllFiles(entries: any[]) {
                             </div>
                             <div id="right-column" :hidden="isLossless">
                                 <p>Quality</p>
-                                <input id="quality" type="range" min="0" max="100" step="5" :value="quality" :disabled=isAuto
-                                    @input="inputQuality">
+                                <input id="quality" type="range" min="0" max="100" step="5" :value="quality"
+                                    :disabled=isAuto @input="inputQuality">
                                 <label for="quality">{{ quality }}</label>
                                 <p>Method</p>
-                                <input id="method " type="range" min="0" max="6" step="1" :value="method" :disabled=isAuto
-                                    @input="inputMethod">
+                                <input id="method " type="range" min="0" max="6" step="1" :value="method"
+                                    :disabled=isAuto @input="inputMethod">
                                 <label for="method">{{ method }}</label>
                             </div>
                         </div>
@@ -325,7 +329,7 @@ async function getAllFiles(entries: any[]) {
                     <p>{{ new Date(dImageObj.file.lastModified) }}</p>
                 </div>
             </div>
-            <div v-else-if="imagesObjs.length !==0" style="text-align: center;">
+            <div v-else-if="imagesObjs.length !== 0" style="text-align: center;">
                 <p>No image selected</p>
                 <p>Click on an image to select it</p>
             </div>
@@ -357,15 +361,23 @@ async function getAllFiles(entries: any[]) {
     margin: 5px 0 5px 0;
 }
 
+/* Useful*/
+.sticky-10 {
+    position: sticky;
+    top: 10px;
+}
+
 /* ID */
 #encode-related {
     display: grid;
     grid-template-columns: 150px 1fr;
 }
+
 #encode-related p {
     margin-top: 10px;
     margin-bottom: 0px
 }
+
 #encoding-progress {
     width: 100%;
     height: 20px;

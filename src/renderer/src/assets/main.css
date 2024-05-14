@@ -63,3 +63,8 @@ button:hover {
 .column-container {
     flex-direction: column;
 }
+
+/* Scrollbar, invisible */
+::-webkit-scrollbar {
+    width: 0px;
+}
