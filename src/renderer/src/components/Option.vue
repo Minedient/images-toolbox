@@ -3,6 +3,7 @@ import { EncodingConstants as EC } from '../constants/number';
 import { useRunTimeParameters } from '../classes/objects';
 import { ref } from 'vue';
 import Foldable from './Foldable.vue';
+import { showNotification } from '../classes/func';
 
 // THE parameters that shared between Components
 const runTimeParameters = useRunTimeParameters();
@@ -59,17 +60,6 @@ const resetToDefault = () => {
     saveConfig();
     loadConfig();
     showNotification('Reset to default parameters!');
-}
-const showNotification = (message) => {
-    const notification = document.createElement('div');
-    notification.textContent = message;
-    notification.classList.add('notification');
-
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-        document.body.removeChild(notification);
-    }, 3000);
 }
 const changeState = (page: string) => {
     pageStates.value[page] = !pageStates.value[page];
@@ -137,20 +127,6 @@ const switchPages = (page: string) => {
         opacity: 1;
     }
 
-}
-
-.notification {
-    position: fixed;
-    width: 280px;
-    padding: 10px;
-    bottom: 0;
-    left: calc(50% - 150px);
-    text-align: center;
-    background-color: #333;
-    color: white;
-    z-index: 1000;
-    font-size: 1.5em;
-    animation: fade 3s;
 }
 
 #holder {

@@ -64,7 +64,43 @@ button:hover {
     flex-direction: column;
 }
 
+.grid-container {
+    display: grid;
+    /* grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); */
+    gap: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.notification {
+    position: fixed;
+    width: 280px;
+    padding: 10px;
+    bottom: 0;
+    left: calc(50% - 150px);
+    text-align: center;
+    background-color: #333;
+    color: white;
+    z-index: 1000;
+    font-size: 1.5em;
+    animation: fade 3s;
+}
+
+.no-drag {
+    -webkit-user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
 /* Scrollbar, invisible */
 ::-webkit-scrollbar {
-    width: 0px;
+    display: none;
+}
+
+.fw-hr {
+    width: 100%;
 }

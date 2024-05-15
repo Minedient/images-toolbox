@@ -1,5 +1,10 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { reactive, ref } from 'vue';
+
+export interface ImageObj {
+    file: File,
+    fileURL: string
+}
 
 export class EncodeParameters {
     isAuto: boolean;
@@ -16,9 +21,20 @@ export class EncodeParameters {
     }
 }
 
+/**
+ * Pinia store for other pages to access the runtime parameters
+ */
 export const useRunTimeParameters = defineStore('rtParams', () => {
     const quality = ref(0);
     const method = ref(0);
     const zCompression = ref(0);
     return { quality, method, zCompression };
+})
+
+/**
+ * Pinia store for other pages to access the images data imported in encode page
+ */
+export const useImagesData = defineStore('imagesDataStore', () => {
+    const images: ImageObj[] = reactive([]);
+    return { images };
 })

@@ -1,13 +1,8 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import Collapsable from './Collapsable.vue';
-import { EncodeParameters } from '../classes/objects';
-import { useRunTimeParameters } from '../classes/objects';
-
-interface ImageObj {
-    file: File,
-    fileURL: string
-}
+import { EncodeParameters, ImageObj, useRunTimeParameters, useImagesData } from '../classes/objects';
+import { showNotification } from '../classes/func';
 
 // Use pinia to keep check on the runtime parameters
 useRunTimeParameters().$subscribe((_mutation, state) => {
@@ -16,8 +11,10 @@ useRunTimeParameters().$subscribe((_mutation, state) => {
     method.value = state.method;
 });
 
+const imagesDataStore = useImagesData();
+
 const dragzone = ref('');
-const imagesObjs: ImageObj[] = reactive([]);
+const imageObjs: ImageObj[] = reactive([]);
 const hasDetailed = ref(false);
 const dImageObj = reactive(<ImageObj>{});
 const selectedImages: ImageObj[] = reactive([]);
@@ -43,7 +40,7 @@ const filesDropped = async (event: DragEvent) => {
     dragzone.value = '';
     const files = (await readDroppedEntries(event.dataTransfer)).flat().filter(file => file.type.startsWith('image/'));
     files.forEach(file => {
-        imagesObjs.push({ file: file, fileURL: URL.createObjectURL(file) })
+        imageObjs.push({ file: file, fileURL: URL.createObjectURL(file) })
     });
 }
 
@@ -52,7 +49,7 @@ const filesSelected = async (event: Event) => {
     const target = event.target as HTMLInputElement;
     const files = target.files;
     (files ? [...files].filter(file => file.type.startsWith('image/')) : []).forEach(file => {
-        imagesObjs.push({ file: file, fileURL: URL.createObjectURL(file) })
+        imageObjs.push({ file: file, fileURL: URL.createObjectURL(file) })
     });
 
     //Ensure the input is cleared so that the same files can be selected again and trigger the change event correctly
@@ -70,9 +67,9 @@ const dragover = (event: DragEvent) => {
 }
 
 const clearImagesPanel = () => {
-    // Revoke all object URLs and clear the imagesObjs array
-    imagesObjs.forEach(obj => URL.revokeObjectURL(obj.fileURL));
-    imagesObjs.splice(0, imagesObjs.length);
+    // Revoke all object URLs and clear the imageObjs array
+    imageObjs.forEach(obj => URL.revokeObjectURL(obj.fileURL));
+    imageObjs.splice(0, imageObjs.length);
 
     //Set the detailed viewer to false
     hasDetailed.value = false;
@@ -90,7 +87,7 @@ const loadImageToDetailedViewer = (event: MouseEvent) => {
         }
     }
     hasDetailed.value = true;
-    const imageObj = imagesObjs.find(obj => obj.fileURL === target.src);
+    const imageObj = imageObjs.find(obj => obj.fileURL === target.src);
     if (imageObj) {
         dImageObj.file = imageObj.file;
         dImageObj.fileURL = imageObj.fileURL;
@@ -124,7 +121,7 @@ const inputMethod = (event: Event) => {
 
 const addToselectedImages = (event: Event) => {
     const element = event.target as HTMLImageElement;
-    const clickedImage = imagesObjs.find(obj => obj.fileURL === element.src);
+    const clickedImage = imageObjs.find(obj => obj.fileURL === element.src);
     if (clickedImage) {
         if (selectedImages.includes(clickedImage)) {
             selectedImages.splice(selectedImages.indexOf(clickedImage), 1);
@@ -133,17 +130,23 @@ const addToselectedImages = (event: Event) => {
 }
 
 const isImageSelected = (url: string) => {
-    const image = imagesObjs.find(obj => obj.fileURL === url);
+    const image = imageObjs.find(obj => obj.fileURL === url);
     return image !== undefined && selectedImages.includes(image);
 }
 
 const selectAll = () => {
     deselectAll();
-    imagesObjs.forEach(obj => selectedImages.push(obj));
+    imageObjs.forEach(obj => selectedImages.push(obj));
 }
 
 const deselectAll = () => {
     selectedImages.splice(0, selectedImages.length);
+}
+
+const sendToResize = () => {
+    console.log("Sending images to resize page.", imageObjs);
+    imagesDataStore.images = imageObjs;
+    showNotification('Images sent to resize page!');
 }
 
 /**
@@ -257,12 +260,12 @@ async function getAllFiles(entries: any[]) {
                     <button class="small-button" @click="clearImagesPanel">Clear All</button>
                 </div>
                 <div id="button-list">
-                    <button v-if="imagesObjs.length !== 0" class="small-button" @click="selectAll">Select all</button>
-                    <button v-if="imagesObjs.length !== 0" class="small-button" @click="deselectAll">Deselect
+                    <button v-if="imageObjs.length !== 0" class="small-button" @click="selectAll">Select all</button>
+                    <button v-if="imageObjs.length !== 0" class="small-button" @click="deselectAll">Deselect
                         all</button>
                 </div>
                 <hr class="fw-hr">
-                <p class="short-p">Total number of images: {{ imagesObjs.length }}</p>
+                <p class="short-p">Total number of images: {{ imageObjs.length }}</p>
                 <hr class="fw-hr">
                 <div class="container vertical">
                     <Collapsable title="Encoding parameters">
@@ -298,19 +301,21 @@ async function getAllFiles(entries: any[]) {
                         </div>
                     </Collapsable>
                 </div>
-                <hr class="fw-hr">
-                <div v-if="imagesObjs.length !== 0" id="selected-images" class="container vertical">
+                <hr v-if="imageObjs.length !== 0" class="fw-hr">
+                <div v-if="imageObjs.length !== 0" id="selected-images" class="container vertical">
                     <h3 v-if="selectedImages.length == 0">No images selected</h3>
                     <h3 v-else>Selected images: {{ selectedImages.length }}</h3>
                     <p class="short-p">Press ctrl + mouse click to select images.</p>
                     <p class="short-p">Ctrl + Click again to deselect it.</p>
                 </div>
+                <hr class="fw-hr"> <!--Add button to send images to resize page-->
+                <button @click="sendToResize">Send to resize</button>
             </div>
         </div>
 
         <!--Images Viewer-->
         <div class="container" id="images-viewer">
-            <img v-for="image in imagesObjs" :src="image.fileURL" @click.ctrl="addToselectedImages"
+            <img v-for="image in imageObjs" :src="image.fileURL" @click.ctrl="addToselectedImages"
                 @click.exact="loadImageToDetailedViewer" :style="isImageSelected(image.fileURL) ? selectedBorder : ''">
         </div>
 
@@ -331,7 +336,7 @@ async function getAllFiles(entries: any[]) {
                     <p>{{ new Date(dImageObj.file.lastModified) }}</p>
                 </div>
             </div>
-            <div v-else-if="imagesObjs.length !== 0" style="text-align: center;" class="sticky-10">
+            <div v-else-if="imageObjs.length !== 0" style="text-align: center;" class="sticky-10">
                 <p>No image selected</p>
                 <p>Click on an image to select it</p>
             </div>
@@ -346,10 +351,6 @@ async function getAllFiles(entries: any[]) {
 
 .vertical {
     flex-direction: column;
-}
-
-.fw-hr {
-    width: 100%;
 }
 
 .n-h3 {
