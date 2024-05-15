@@ -242,67 +242,69 @@ async function getAllFiles(entries: any[]) {
 
     <div class="container" id="workspace">
         <!--Tweaker and Infos-->
-        <div class="container vertical" id="tweaker">
-            <div class="borderless-container" id="dropzone" :class="dragzone">
-                <input type="file" id="file-input" multiple webkitdirectory hidden @change="filesSelected">
-                <label for="file-input" @dragover="dragover" @dragleave="dragleave" @drop="filesDropped">Drop files
-                    here
-                    or
-                    click on me</label>
-            </div>
-            <div id="button-list">
-                <button class="small-button" @click="openFolder">Open folder</button>
-                <button class="small-button" @click="convertToWebp(selectedImages)">Encode selected</button>
-                <button class="small-button" @click="clearImagesPanel">Clear All</button>
-            </div>
-            <div id="button-list">
-                <button v-if="imagesObjs.length !== 0" class="small-button" @click="selectAll">Select all</button>
-                <button v-if="imagesObjs.length !== 0" class="small-button" @click="deselectAll">Deselect
-                    all</button>
-            </div>
-            <hr class="fw-hr">
-            <p class="short-p">Total number of images: {{ imagesObjs.length }}</p>
-            <hr class="fw-hr">
-            <div class="container vertical">
-                <Collapsable title="Encoding parameters">
-                    <div id="is-auto">
-                        <p>Auto?</p>
-                        <input type="checkbox" checked @change="checkboxAuto">
-                    </div>
-                    <div id="manual-parameters">
-                        <label for="mode-select">Choose mode: </label>
-                        <select id="mode-select" name="mode" :disabled=isAuto @change="selectMode">
-                            <option value=true>Lossless</option>
-                            <option value=false>Lossy</option>
-                        </select>
-                        <div id="left-right-panel">
-                            <div id="left-column" :hidden="!isLossless">
-                                <p>Z-Compression</p>
-                                <!--TODO rewrite the value to reflect default value set by config.json-->
-                                <input id="z-compression" type="range" min="0" max="9" step="1" :value="zCompression"
-                                    :disabled=isAuto @input="inputZCompression">
-                                <label for="z-compression">{{ zCompression }}</label>
-                            </div>
-                            <div id="right-column" :hidden="isLossless">
-                                <p>Quality</p>
-                                <input id="quality" type="range" min="0" max="100" step="5" :value="quality"
-                                    :disabled=isAuto @input="inputQuality">
-                                <label for="quality">{{ quality }}</label>
-                                <p>Method</p>
-                                <input id="method " type="range" min="0" max="6" step="1" :value="method"
-                                    :disabled=isAuto @input="inputMethod">
-                                <label for="method">{{ method }}</label>
+        <div>
+            <div class="container vertical sticky-10" id="tweaker">
+                <div class="borderless-container" id="dropzone" :class="dragzone">
+                    <input type="file" id="file-input" multiple webkitdirectory hidden @change="filesSelected">
+                    <label for="file-input" @dragover="dragover" @dragleave="dragleave" @drop="filesDropped">Drop files
+                        here
+                        or
+                        click on me</label>
+                </div>
+                <div id="button-list">
+                    <button class="small-button" @click="openFolder">Open folder</button>
+                    <button class="small-button" @click="convertToWebp(selectedImages)">Encode selected</button>
+                    <button class="small-button" @click="clearImagesPanel">Clear All</button>
+                </div>
+                <div id="button-list">
+                    <button v-if="imagesObjs.length !== 0" class="small-button" @click="selectAll">Select all</button>
+                    <button v-if="imagesObjs.length !== 0" class="small-button" @click="deselectAll">Deselect
+                        all</button>
+                </div>
+                <hr class="fw-hr">
+                <p class="short-p">Total number of images: {{ imagesObjs.length }}</p>
+                <hr class="fw-hr">
+                <div class="container vertical">
+                    <Collapsable title="Encoding parameters">
+                        <div id="is-auto">
+                            <p>Auto?</p>
+                            <input type="checkbox" checked @change="checkboxAuto">
+                        </div>
+                        <div id="manual-parameters">
+                            <label for="mode-select">Choose mode: </label>
+                            <select id="mode-select" name="mode" :disabled=isAuto @change="selectMode">
+                                <option value=true>Lossless</option>
+                                <option value=false>Lossy</option>
+                            </select>
+                            <div id="left-right-panel">
+                                <div id="left-column" :hidden="!isLossless">
+                                    <p>Z-Compression</p>
+                                    <!--TODO rewrite the value to reflect default value set by config.json-->
+                                    <input id="z-compression" type="range" min="0" max="9" step="1"
+                                        :value="zCompression" :disabled=isAuto @input="inputZCompression">
+                                    <label for="z-compression">{{ zCompression }}</label>
+                                </div>
+                                <div id="right-column" :hidden="isLossless">
+                                    <p>Quality</p>
+                                    <input id="quality" type="range" min="0" max="100" step="5" :value="quality"
+                                        :disabled=isAuto @input="inputQuality">
+                                    <label for="quality">{{ quality }}</label>
+                                    <p>Method</p>
+                                    <input id="method " type="range" min="0" max="6" step="1" :value="method"
+                                        :disabled=isAuto @input="inputMethod">
+                                    <label for="method">{{ method }}</label>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </Collapsable>
-            </div>
-            <hr class="fw-hr">
-            <div v-if="imagesObjs.length !== 0" id="selected-images" class="container vertical">
-                <h3 v-if="selectedImages.length == 0">No images selected</h3>
-                <h3 v-else>Selected images: {{ selectedImages.length }}</h3>
-                <p class="short-p">Press ctrl + mouse click to select images.</p>
-                <p class="short-p">Ctrl + Click again to deselect it.</p>
+                    </Collapsable>
+                </div>
+                <hr class="fw-hr">
+                <div v-if="imagesObjs.length !== 0" id="selected-images" class="container vertical">
+                    <h3 v-if="selectedImages.length == 0">No images selected</h3>
+                    <h3 v-else>Selected images: {{ selectedImages.length }}</h3>
+                    <p class="short-p">Press ctrl + mouse click to select images.</p>
+                    <p class="short-p">Ctrl + Click again to deselect it.</p>
+                </div>
             </div>
         </div>
 
@@ -314,7 +316,7 @@ async function getAllFiles(entries: any[]) {
 
         <!--Detailed Viewer-->
         <div class="container vertical" id="detailed-viewer">
-            <div v-if="hasDetailed">
+            <div v-if="hasDetailed" class="sticky-10">
                 <img :src="dImageObj.fileURL">
                 <hr class="fw-hr">
                 <h3>Details</h3>
@@ -329,7 +331,7 @@ async function getAllFiles(entries: any[]) {
                     <p>{{ new Date(dImageObj.file.lastModified) }}</p>
                 </div>
             </div>
-            <div v-else-if="imagesObjs.length !== 0" style="text-align: center;">
+            <div v-else-if="imagesObjs.length !== 0" style="text-align: center;" class="sticky-10">
                 <p>No image selected</p>
                 <p>Click on an image to select it</p>
             </div>
