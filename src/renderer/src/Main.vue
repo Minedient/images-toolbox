@@ -3,13 +3,15 @@ import { ref } from 'vue';
 import Encode from './components/Encode.vue';
 import Option from './components/Option.vue';
 import Help from './components/Help.vue';
+import Resize from './components/Resize.vue';
 import { useRunTimeParameters } from './classes/objects';
 const buttonList = ref('buttonList');
 const workspaceType = ref('Encode');
 const workspaces = {
     'Encode': Encode,
     'Option': Option,
-    'Help': Help
+    'Help': Help,
+    'Resize': Resize
 }
 // Functions
 const changePage = (page: string) => workspaceType.value = page;
@@ -31,8 +33,8 @@ window.api.sendToMain('getConfig', 'main');
 <template>
     <div :class="buttonList">
         <button @click="changePage('Encode')">encode</button>
-        <!--button @click="changePage('Resize')">resize</button>
-        <button @click="changePage('Rotate')">rotate</button -->
+        <button @click="changePage('Resize')">resize</button>
+        <!--button @click="changePage('Rotate')">rotate</button -->
         <button @click="changePage('Option')">option</button>
         <button @click="changePage('Help')">help</button>
     </div>
