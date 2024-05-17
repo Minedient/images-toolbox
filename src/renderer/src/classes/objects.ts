@@ -4,6 +4,8 @@ import { reactive, ref } from 'vue';
 export interface ImageObj {
     file: File,
     fileURL: string
+    width: number,
+    height: number
 }
 
 export class EncodeParameters {

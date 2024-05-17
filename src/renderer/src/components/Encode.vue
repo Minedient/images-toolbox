@@ -143,9 +143,8 @@ const deselectAll = () => {
     selectedImages.splice(0, selectedImages.length);
 }
 
-const sendToResize = () => {
-    console.log("Sending images to resize page.", imageObjs);
-    imagesDataStore.images = imageObjs;
+const sendToResize = (mode: string) => {
+    (mode === 'all')? imagesDataStore.images = imageObjs : imagesDataStore.images = selectedImages;
     showNotification('Images sent to resize page!');
 }
 
@@ -309,7 +308,8 @@ async function getAllFiles(entries: any[]) {
                     <p class="short-p">Ctrl + Click again to deselect it.</p>
                 </div>
                 <hr class="fw-hr"> <!--Add button to send images to resize page-->
-                <button @click="sendToResize">Send to resize</button>
+                <button @click="sendToResize('all')">Send all to resize</button>
+                <button @click="sendToResize('some')">Send selected to resize</button>
             </div>
         </div>
 
@@ -351,13 +351,6 @@ async function getAllFiles(entries: any[]) {
 
 .vertical {
     flex-direction: column;
-}
-
-.n-h3 {
-    width: 100%;
-    margin: 0px;
-    padding-top: 5px;
-    padding-bottom: 5px;
 }
 
 .short-p {

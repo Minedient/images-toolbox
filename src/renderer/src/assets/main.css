@@ -10,7 +10,12 @@ body {
     padding: 10px;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     color: var(--text-white);
 }
 
@@ -21,6 +26,7 @@ a {
 a:hover {
     color: var(--text-white-highlight);
 }
+
 /* Basic Button */
 button {
     cursor: pointer;
@@ -103,4 +109,45 @@ button:hover {
 
 .fw-hr {
     width: 100%;
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    text-align: center;
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    width: 120px;
+    background-color: transparent;
+    border: var(--border-color) solid 1px;
+    color: var(--text-white);
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px 0;
+    font-size: small;
+    font-weight: bold;
+
+    /* Positioning */
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    
+    z-index: 1;
+    transition: background-color 0.3s ease;
+    
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    background-color: var(--background-soft-dark);
+}
+
+.n-h3 {
+    width: 100%;
+    margin: 0px;
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
