@@ -11,10 +11,12 @@ const quality = ref(runTimeParameters.quality);
 const method = ref(runTimeParameters.method);
 const zCompression = ref(runTimeParameters.zCompression);
 const encode = ref(null as typeof Foldable | null);
+const resize = ref(null as typeof Foldable | null);
 const setting = ref(null as typeof Foldable | null);
 
 const pageStates = ref({
     encode: true,
+    resize: false,
     setting: false
 });
 
@@ -50,6 +52,10 @@ const zBarChange = (event: Event) => {
     zCompression.value = parseInt(target.value);
 }
 
+const changeResizeDefaultOutput = (type: string, event: Event) => {
+    showNotification('Default output type changed to ' + type);
+}
+
 /**
  * Load from EC and do a save/load cycle 
  */
@@ -66,6 +72,9 @@ const changeState = (page: string) => {
     switch (page) {
         case 'encode':
             encode.value?.toggle();
+            break;
+        case 'resize':
+            resize.value?.toggle();
             break;
         case 'setting':
             setting.value?.toggle();
@@ -88,6 +97,7 @@ const switchPages = (page: string) => {
     <div class="container" id="holder">
         <div class="container column-container" style="gap:10px">
             <button @click="switchPages('encode')">Encoding</button>
+            <button @click="switchPages('resize')">Resize</button>
             <button @click="switchPages('setting')">Setting</button>
         </div>
         <div class="container" style="flex-direction: column;">
@@ -103,6 +113,20 @@ const switchPages = (page: string) => {
                     <input @input="zBarChange" id="zBar" type="range" min="0" max="9" step="1" :value="zCompression">
                     <button @click="saveConfig(); showNotification('Setting Saved!');">Save</button>
                     <button @click="resetToDefault">Reset To Default</button>
+                </div>
+            </Foldable>
+            <Foldable external-only ref="resize">
+                <div id="resize-option-panel">
+                    <!--Style it later-->
+                    <p>Output file type</p>
+                    <input type="radio" name="outputType" value="auto" id="auto" checked>
+                    <label for="auto">Auto</label>
+                    <input type="radio" name="outputType" value="png" id="png">
+                    <label for="png">PNG</label>
+                    <input type="radio" name="outputType" value="jpg" id="jpg">
+                    <label for="jpg">JPG</label>
+                    <input type="radio" name="outputType" value="webp" id="webp">
+                    <label for="webp">WEBP</label>
                 </div>
             </Foldable>
             <Foldable external-only ref="setting">
@@ -131,7 +155,7 @@ const switchPages = (page: string) => {
 
 #holder {
     display: grid;
-    grid-template-columns: 1fr 10fr;
+    grid-template-columns: 1.2fr 10fr;
     margin-top: 10px;
     gap: 10px;
 }

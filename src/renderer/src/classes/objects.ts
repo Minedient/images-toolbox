@@ -30,7 +30,7 @@ export const useRunTimeParameters = defineStore('rtParams', () => {
     const quality = ref(0);
     const method = ref(0);
     const zCompression = ref(0);
-    return { quality, method, zCompression };
+    return { quality, method, zCompression};
 })
 
 /**

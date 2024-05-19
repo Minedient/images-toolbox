@@ -104,6 +104,13 @@ const updateKeepRatio = (event: Event) => {
     keepRatio.value = (event.target as HTMLInputElement).checked;
 }
 
+const save = () => {
+    const a = document.createElement('a');
+    a.href = resized.fileURL;
+    a.download = 'resized.png';
+    a.click();
+}
+
 //Lifecycle hooks, update it "seamlessly"
 onActivated(() => {
     imageObjs.splice(0, imageObjs.length, ...imagesDataStore.images);
@@ -196,6 +203,7 @@ onMounted(() => {
             </Foldable>
 
             <button @click="resize">Resize!</button>
+            <button @click="save">Save image!</button>
         </div>
         <div id="middle-panel" class="container column-container">
             <h3>Original image: {{ original.width }}x{{ original.height }}</h3>
