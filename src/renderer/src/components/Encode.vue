@@ -40,7 +40,9 @@ const filesDropped = async (event: DragEvent) => {
     dragzone.value = '';
     const files = (await readDroppedEntries(event.dataTransfer)).flat().filter(file => file.type.startsWith('image/'));
     files.forEach(file => {
-        imageObjs.push({ file: file, fileURL: URL.createObjectURL(file) })
+        const img = new Image(); img.src = URL.createObjectURL(file);
+        img.onload = () => imageObjs.push({ file: file, fileURL: URL.createObjectURL(file), width: img.width, height: img.height });
+        //imageObjs.push({ file: file, fileURL: URL.createObjectURL(file), width: 0, height: 0 })
     });
 }
 
@@ -49,7 +51,9 @@ const filesSelected = async (event: Event) => {
     const target = event.target as HTMLInputElement;
     const files = target.files;
     (files ? [...files].filter(file => file.type.startsWith('image/')) : []).forEach(file => {
-        imageObjs.push({ file: file, fileURL: URL.createObjectURL(file) })
+        const img = new Image(); img.src = URL.createObjectURL(file);
+        img.onload = () => imageObjs.push({ file: file, fileURL: URL.createObjectURL(file), width: img.width, height: img.height });
+        //imageObjs.push({ file: file, fileURL: URL.createObjectURL(file), width: 0, height: 0 })
     });
 
     //Ensure the input is cleared so that the same files can be selected again and trigger the change event correctly

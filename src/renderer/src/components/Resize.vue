@@ -2,13 +2,12 @@
 import { onActivated, onMounted, reactive, ref } from 'vue';
 import { ImageObj, useImagesData } from '../classes/objects';
 import { showNotification, gridColSpan, gridAreaSpan } from '../classes/func';
-import Foldable from './Foldable.vue';
 
 // Runtime variables
 const keepRatio = ref(true);
 const scale = ref(1);
-const original = reactive({ width: 0, height: 0 } as ImageObj);
-const resized = reactive({ width: 0, height: 0 } as ImageObj);
+const original = reactive({ } as ImageObj);
+const resized = reactive({ } as ImageObj);
 const targetWidth = ref(0);
 const targetHeight = ref(0);
 const presets = ref([0.25, 0.5, 2, 3, 4]);
@@ -19,20 +18,11 @@ const ipl = ref(null as HTMLDivElement | null);
 const imagesDataStore = useImagesData();
 
 function selectImage(image: ImageObj) {
+    // Set the details for the original image
     original.fileURL = image.fileURL;
-    if (image.width && image.height) {
-        original.width = image.width;
-        original.height = image.height;
-    } else {
-        const img = new Image();
-        img.src = image.fileURL;
-        original.width = img.width;
-        original.height = img.height;
-
-        // Update the image object, so next time it will be faster
-        image.width = img.width;
-        image.height = img.height;
-    }
+    original.width = image.width;
+    original.height = image.height;
+    // Set the target width and height
     targetWidth.value = original.width;
     targetHeight.value = original.height;
 }
@@ -100,8 +90,14 @@ const resize = () => {
     showNotification('Image Resized!');
 }
 
+/**
+ * Update the keep ratio value
+ * If it is true, update the width and height using the scale
+ * @param event 
+ */
 const updateKeepRatio = (event: Event) => {
     keepRatio.value = (event.target as HTMLInputElement).checked;
+    if (keepRatio.value) settingChange('scale', { target: { value: scale.value.toString() } } as unknown as Event);
 }
 
 const save = () => {
@@ -165,42 +161,36 @@ onMounted(() => {
             <hr class="fw-hr">
             <p>Resize presets</p>
             <div id="resizePresetList">
-                <button class="small-button" @click="directResize(0.25);">0.25x</button>
-                <button class="small-button" @click="directResize(0.5);">0.5x</button>
-                <button class="small-button" @click="directResize(2);">2x</button>
-                <button class="small-button" @click="directResize(3);">3x</button>
-                <button class="small-button" @click="directResize(4);">4x</button>
+                <!--List of button for preset resizing-->
+                <button v-for="preset in presets" :key="preset" class="small-button" @click="directResize(preset)">{{
+                    preset }}x</button>
             </div>
             <hr class="fw-hr">
-            <Foldable init externalOnly>
-                <div class="grid-container" id="resizer">
-                    <h3 class="n-h3" :style="gridColSpan(1, 4)" style="text-align: center;">Resize control</h3>
-                    <label :style="gridColSpan(1, 3)">Keep Aspect Ratio?</label>
-                    <input type="checkbox" id="keepRatio" checked @input="updateKeepRatio">
-                    <label v-if="keepRatio" for="scaleInput" class="tooltip" :style="gridAreaSpan(3, 1, 2, 2)">Scale:
-                        <span class="tooltip-text">It
-                            set the scale of resizing</span></label>
-                    <input v-if="keepRatio" id="scaleInput" type="number" :value="scale" min="0.01" max="8" step="0.01"
-                        placeholder="0.01-8" @input="settingChange('scale', $event)">
-                    <button v-if="keepRatio" class="small-button" id="resetButton"
-                        @click="settingChange('reset', $event)">Reset</button>
-                    <input v-if="keepRatio" id="scaleBar" :value="scale" type="range" min="0.01" max="8" step="0.01"
-                        @input="settingChange('scale', $event)" :style="gridColSpan(3, 2)">
-                    <!--div belows exists even if not keep ratio-->
-                    <label for="newWidth" :style="gridColSpan(1, 2)">
-                        New Width:
-                    </label>
-                    <input type="number" id="newWidth" :style="gridColSpan(3, 2)" :value="targetWidth"
-                        @change="settingChange('width', $event)">
-                    <label for="targetHeight
+            <div class="grid-container" id="resizer">
+                <h3 class="n-h3" :style="gridColSpan(1, 4)" style="text-align: center;">Resize control</h3>
+                <label :style="gridColSpan(1, 3)">Keep Aspect Ratio?</label>
+                <input type="checkbox" id="keepRatio" checked @input="updateKeepRatio">
+                <label for="scaleInput" class="tooltip" :style="gridAreaSpan(3, 1, 2, 2)">Scale:
+                    <span class="tooltip-text">It
+                        set the scale of resizing</span></label>
+                <input :disabled="!keepRatio" id="scaleInput" type="number" :value="scale" min="0.01" max="8"
+                    step="0.01" placeholder="0.01-8" @input="settingChange('scale', $event)">
+                <button class="small-button" id="resetButton" @click="settingChange('reset', $event)">Reset</button>
+                <input :disabled="!keepRatio" id="scaleBar" :value="scale" type="range" min="0.01" max="8" step="0.01"
+                    @input="settingChange('scale', $event)" :style="gridColSpan(3, 2)">
+                <label for="newWidth" :style="gridColSpan(1, 2)">
+                    New Width:
+                </label>
+                <input type="number" id="newWidth" :style="gridColSpan(3, 2)" :value="targetWidth"
+                    @change="settingChange('width', $event)">
+                <label for="targetHeight
                 " :style="gridColSpan(1, 2)">
-                        New Height:
-                    </label>
-                    <input type="number" id="targetHeight
+                    New Height:
+                </label>
+                <input type="number" id="targetHeight
                 " :style="gridColSpan(3, 2)" :value="targetHeight
                     " @change="settingChange('height', $event)">
-                </div>
-            </Foldable>
+            </div>
 
             <button @click="resize">Resize!</button>
             <button @click="save">Save image!</button>

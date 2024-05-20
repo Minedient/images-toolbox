@@ -60,7 +60,21 @@
             </Collapsable>
             <Collapsable title="Resize" type="h2" static externalTrigger>
                 <p>
-                    Resize images to a specific width and height. <-- this is not yet implemented
+                    Resize images to a specific width and height.
+                    Currently, you have to import the images from the "Encode" tab, before you can choose the images to resize.
+                    <h3>Basic work flow:</h3>
+                    <ul>
+                        <li>Pick the image(s) you want to resize by either (Both done in "Encode" tab)</li>
+                            <ul>
+                                <li>Drag and drop the folders contain the images</li>
+                                <li>Click on the "Click on me" area to choose the folder</li>
+                            </ul>
+                        <li>Select the images you want to resize by double click.</li>
+                        <li>Choose the width and height</li>
+                        <li>Click the "Resize selected" button</li>
+                        <li>Wait for the resizing process to finish</li>
+                        <li>Click on save to save the resized image</li>
+                    </ul>
                 </p>
             </Collapsable>
         </div>
