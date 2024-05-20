@@ -19,6 +19,7 @@ const imagesDataStore = useImagesData();
 
 function selectImage(image: ImageObj) {
     // Set the details for the original image
+    original.file = image.file;
     original.fileURL = image.fileURL;
     original.width = image.width;
     original.height = image.height;
@@ -27,6 +28,17 @@ function selectImage(image: ImageObj) {
     targetHeight.value = original.height;
 }
 
+/**
+ * A function to automatically calculate the target width and height
+ * given the setting used.
+ * 
+ * @param type The type of how setting is changed:
+ *              - scale: The scale is changed and the width and height are calculated
+ *              - width: The width is changed and calculate the height if aspect ratio is kept
+ *              - height: The height is changed and calulate the width if aspect ratio is kept
+ *              - reset: Reset the scale, width and height to the dimension of the original image
+ * @param event The event that triggers the change
+ */
 const settingChange = (type: string, event: Event) => {
     const target = event.target as HTMLInputElement;
     switch (type) {
@@ -100,10 +112,10 @@ const updateKeepRatio = (event: Event) => {
     if (keepRatio.value) settingChange('scale', { target: { value: scale.value.toString() } } as unknown as Event);
 }
 
-const save = () => {
+const save = (oriName: string, width: number, height: number) => {
     const a = document.createElement('a');
     a.href = resized.fileURL;
-    a.download = 'resized.png';
+    a.download = `${oriName}_${width}x${height}.png`;
     a.click();
 }
 
@@ -193,7 +205,7 @@ onMounted(() => {
             </div>
 
             <button @click="resize">Resize!</button>
-            <button @click="save">Save image!</button>
+            <button @click="save(original.file.name,resized.width,resized.height)">Save image!</button>
         </div>
         <div id="middle-panel" class="container column-container">
             <h3>Original image: {{ original.width }}x{{ original.height }}</h3>

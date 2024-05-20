@@ -11,6 +11,7 @@ useRunTimeParameters().$subscribe((_mutation, state) => {
     method.value = state.method;
 });
 
+// Use pinia to keep check on the images data
 const imagesDataStore = useImagesData();
 
 const dragzone = ref('');
@@ -42,7 +43,8 @@ const filesDropped = async (event: DragEvent) => {
     files.forEach(file => {
         const img = new Image(); img.src = URL.createObjectURL(file);
         img.onload = () => imageObjs.push({ file: file, fileURL: URL.createObjectURL(file), width: img.width, height: img.height });
-        //imageObjs.push({ file: file, fileURL: URL.createObjectURL(file), width: 0, height: 0 })
+        // Sync changes to pinia store
+        imagesDataStore.images = imageObjs;
     });
 }
 
@@ -53,7 +55,8 @@ const filesSelected = async (event: Event) => {
     (files ? [...files].filter(file => file.type.startsWith('image/')) : []).forEach(file => {
         const img = new Image(); img.src = URL.createObjectURL(file);
         img.onload = () => imageObjs.push({ file: file, fileURL: URL.createObjectURL(file), width: img.width, height: img.height });
-        //imageObjs.push({ file: file, fileURL: URL.createObjectURL(file), width: 0, height: 0 })
+        // Sync changes to pinia store
+        imagesDataStore.images = imageObjs;
     });
 
     //Ensure the input is cleared so that the same files can be selected again and trigger the change event correctly
@@ -311,9 +314,6 @@ async function getAllFiles(entries: any[]) {
                     <p class="short-p">Press ctrl + mouse click to select images.</p>
                     <p class="short-p">Ctrl + Click again to deselect it.</p>
                 </div>
-                <hr class="fw-hr"> <!--Add button to send images to resize page-->
-                <button @click="sendToResize('all')">Send all to resize</button>
-                <button @click="sendToResize('some')">Send selected to resize</button>
             </div>
         </div>
 
