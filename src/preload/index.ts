@@ -60,6 +60,7 @@ function recevieFromMain(channel: string, callback: Function) {
 async function convertToWebp(inputPath: string, outputPath: string, params: EncodeParameters) {
   console.log("Input received! ", inputPath, outputPath, params)
   console.log("Final path: ", uniqueFileName(outputPath))
+  
   // Default to the windows version
   let cwebp = CWebp(inputPath, './dependencies/window-x64/cwebp.exe');
   switch (platformArch.platform) {

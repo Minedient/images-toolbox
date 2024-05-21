@@ -137,7 +137,7 @@ const switchPages = (page: string) => {
             <Foldable external-only ref="resize">
                 <div id="resize-option-panel">
                     <!--Style it later-->
-                    <p>Output file type</p>
+                    <p>Output file type - Not working at this moment</p>
                     <input type="radio" name="outputType" value="auto" id="auto" checked>
                     <label for="auto">Auto</label>
                     <input type="radio" name="outputType" value="png" id="png">
