@@ -1,5 +1,0 @@
-// TODO: Add bulk resize in Resize.Vue
-// 1.Resize the first image given the width and height
-// 2.Download the image automatically
-// 3.Repeat until all images are resized
-// 4.(Optional) Add a progress bar or notification for each image resized [x out f y images resized]
