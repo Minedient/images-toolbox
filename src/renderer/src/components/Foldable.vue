@@ -91,7 +91,7 @@ onMounted(() => {
 defineExpose({ toggle, getState })
 </script>
 <template>
-    <div class="collapsable n" :class="{ c: !externalOnly }" ref="thisTag" @click="onToggle"
+    <div class="collapsable n" :class="{ c: !externalOnly, closed: !toggled }" ref="thisTag" @click="onToggle"
         :style="{ 'max-height': maxHeight + 'px' }">
         <slot />
     </div>
@@ -102,6 +102,11 @@ defineExpose({ toggle, getState })
     margin: 0px;
     padding-top: 5px;
     padding-bottom: 5px;
+}
+/* Ensure it does not have any padding when closed */
+.closed {
+    padding-top: 0px;
+    padding-bottom: 0px;
 }
 
 .c {

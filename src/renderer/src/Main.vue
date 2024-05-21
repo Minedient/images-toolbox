@@ -25,6 +25,7 @@ window.api.recevieFromMain('configReturned', (data) => {
     runTimeParameters.quality = data.quality;
     runTimeParameters.method = data.method;
     runTimeParameters.zCompression = data.zCompression;
+    runTimeParameters.outputFolder = data.outputFolder;
 });
 //@ts-ignore (It is defined in preload.ts)
 window.api.sendToMain('getConfig', 'main');

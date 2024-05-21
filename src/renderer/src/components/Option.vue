@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { EncodingConstants as EC } from '../constants/number';
+import { AppSettingConstants as ASC } from '../constants/setting';
 import { useRunTimeParameters } from '../classes/objects';
 import { ref } from 'vue';
 import Foldable from './Foldable.vue';
-import { showNotification } from '../classes/func';
+import { showNotification, gridColSpan } from '../classes/func';
 
 // THE parameters that shared between Components
 const runTimeParameters = useRunTimeParameters();
 const quality = ref(runTimeParameters.quality);
 const method = ref(runTimeParameters.method);
 const zCompression = ref(runTimeParameters.zCompression);
+const outputFolder = ref(runTimeParameters.outputFolder);
 const encode = ref(null as typeof Foldable | null);
 const resize = ref(null as typeof Foldable | null);
 const setting = ref(null as typeof Foldable | null);
@@ -20,20 +22,35 @@ const pageStates = ref({
     setting: false
 });
 
+/**
+ * Load the configuration from the main process
+ * 1. Sned a request to the main process to load the configuration
+ * 2. The main process will send the configuration back
+ * 3. The configuration will be saved to the runtime parameters
+ * 4. The runtime parameters will be used to update the UI
+ */
 const loadConfig = () => {
     //@ts-ignore (It is defined in preload.ts)
     window.api.sendToMain('loadConfig');
 }
 
+/**
+ * Save the configuration to the main process
+ * 1. Save the configuration to the runtime parameters
+ * 2. Send the configuration to the main process
+ * 3. The main process will save the configuration to the file
+ */
 const saveConfig = () => {
     runTimeParameters.quality = quality.value;
     runTimeParameters.method = method.value;
     runTimeParameters.zCompression = zCompression.value;
+    runTimeParameters.outputFolder = outputFolder.value;
     //@ts-ignore (It is defined in preload.ts)
     window.api.sendToMain('saveConfig', JSON.stringify({
         quality: runTimeParameters.quality,
         method: runTimeParameters.method,
-        zCompression: runTimeParameters.zCompression
+        zCompression: runTimeParameters.zCompression,
+        outputFolder: runTimeParameters.outputFolder
     }));
 }
 
@@ -57,12 +74,14 @@ const changeResizeDefaultOutput = (type: string, event: Event) => {
 }
 
 /**
- * Load from EC and do a save/load cycle 
+ * Load constant values from the constants file
+ * and do a save load cycle
  */
 const resetToDefault = () => {
     quality.value = EC.defaultQuality;
     method.value = EC.defaultMethod;
     zCompression.value = EC.defaultZ;
+    outputFolder.value = ASC.defaultOutputFolder;
     saveConfig();
     loadConfig();
     showNotification('Reset to default parameters!');
@@ -100,7 +119,7 @@ const switchPages = (page: string) => {
             <button @click="switchPages('resize')">Resize</button>
             <button @click="switchPages('setting')">Setting</button>
         </div>
-        <div class="container" style="flex-direction: column;">
+        <div class="container column-container">
             <Foldable init external-only ref="encode">
                 <div id="encode-option-panel">
                     <p>Quality: {{ quality }}</p>
@@ -132,6 +151,13 @@ const switchPages = (page: string) => {
             <Foldable external-only ref="setting">
                 <div id="setting-option-panel">
                     <!-- Add contents -->
+                    <h3 :style="gridColSpan(1,3)">App settings</h3>
+                    <label for="outputFolder" class="tooltip" style="text-align: left;" :style="gridColSpan(1,1)">Output folder
+                        <span class="tooltip-text">The folder where the output files will be saved</span>
+                    </label>
+                    <input type="text" id="outputFolder" placeholder="Output Folder" :value="outputFolder" :style="gridColSpan(1,1)">
+                    <button @click="saveConfig(); showNotification('Setting Saved!');">Save</button>
+                    <button @click="resetToDefault">Reset To Default</button>
                 </div>
             </Foldable>
         </div>
@@ -162,7 +188,13 @@ const switchPages = (page: string) => {
 
 #encode-option-panel {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+#setting-option-panel {
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
 }
 </style>

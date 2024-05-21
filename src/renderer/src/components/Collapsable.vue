@@ -93,7 +93,8 @@ onUpdated(() => {
 </script>
 
 <template>
-    <component :is="type" class="n-h3 c-h3" @click="onToggle" ref="thisTag">{{ composedTitle }}</component>
+    <component :is="type" class="n-h3 c-h3" :class="{ closed: !toggled }" @click="onToggle" ref="thisTag">{{ composedTitle
+        }}</component>
     <div class="collapsable" :style="{ 'max-height': maxHeight + 'px' }">
         <slot />
     </div>
@@ -105,6 +106,11 @@ onUpdated(() => {
     margin: 0px;
     padding-top: 5px;
     padding-bottom: 5px;
+}
+/* Ensure it does not have any padding when closed */
+.closed {
+    padding-top: 0px;
+    padding-bottom: 0px;
 }
 
 .c-h3 {

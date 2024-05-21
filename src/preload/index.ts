@@ -6,10 +6,12 @@ import path from 'path';
 import fs from 'fs';
 
 // Custom APIs for renderer
-const api = { convertToWebp, sendToMain, recevieFromMain}
+const api = { convertToWebp, sendToMain, recevieFromMain }
 
 const toMainCommands = ['openOutputFolder', 'loadConfig', 'saveConfig', 'getConfig'];
 const fromMainCommands = ['configLoaded', 'configSaved', 'configReturned'];
+
+const platformArch = { platform: process.platform, arch: process.arch };
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
@@ -58,7 +60,24 @@ function recevieFromMain(channel: string, callback: Function) {
 async function convertToWebp(inputPath: string, outputPath: string, params: EncodeParameters) {
   console.log("Input received! ", inputPath, outputPath, params)
   console.log("Final path: ", uniqueFileName(outputPath))
-  var cwebp = CWebp(inputPath, './dependencies/cwebp.exe');
+  // Default to the windows version
+  let cwebp = CWebp(inputPath, './dependencies/window-x64/cwebp.exe');
+  switch (platformArch.platform) {
+    case 'win32':
+      // Only support x64
+      if(platformArch.arch !== 'x64') throw new Error('Unsupported architecture!');
+      break;
+    case 'linux':
+      // Only support x64 and arm64
+      cwebp = (platformArch.arch === 'x64') ? CWebp(inputPath, './dependencies/linux-x64/cwebp') : CWebp(inputPath, './dependencies/linux-arm64/cwebp');
+      break;
+    case 'darwin':
+      cwebp = (platformArch.arch === 'x64') ? CWebp(inputPath, './dependencies/mac-x64/cwebp') : CWebp(inputPath, './dependencies/mac-arm64/cwebp');
+      break;
+    default:
+      throw new Error('Unsupported platform!');
+  }
+  //var cwebp = CWebp(inputPath, './dependencies/cwebp.exe');
   cwebp.multiThreading();
 
   // Process parameters

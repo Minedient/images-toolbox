@@ -68,6 +68,7 @@ app.whenReady().then(() => {
       "quality": 80,
       "method": 4,
       "zCompression": 6,
+      "outputFolder": "output"
     }));
   }
 
@@ -91,8 +92,12 @@ app.on('window-all-closed', () => {
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
+
+/**
+ * openOutputFolder
+ */
 ipcMain.on('openOutputFolder', ()=>{
-  shell.openPath(path.join(app.getAppPath(), 'output'));
+  shell.openPath(path.join(app.getAppPath(), config.outputFolder));
 })
 
 // Load the config file and send it to the renderer
