@@ -36,6 +36,7 @@ const selectedBorder = reactive({
     border: '4px solid var(--image-border-color)'
 });
 
+//TODO: Fix - Only the first 100 images is loaded if a directory is dropped
 const filesDropped = async (event: DragEvent) => {
     event.preventDefault();
     dragzone.value = '';
@@ -150,6 +151,7 @@ const deselectAll = () => {
     selectedImages.splice(0, selectedImages.length);
 }
 
+//@ts-ignore (Depreceated and will be removed in the future)
 const sendToResize = (mode: string) => {
     (mode === 'all')? imagesDataStore.images = imageObjs : imagesDataStore.images = selectedImages;
     showNotification('Images sent to resize page!');

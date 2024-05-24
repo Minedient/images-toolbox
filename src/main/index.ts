@@ -108,11 +108,11 @@ ipcMain.on('loadConfig', ()=>{
 
 // Just send the config to the renderer
 // target is the window to send the config to
-ipcMain.on('getConfig', (event, target)=>{
+ipcMain.on('getConfig', (_event, target)=>{
   console.log('Sending config to renderer: ', target);
   mainWindow.webContents.send('configReturned', config);
 })
 
-ipcMain.on('saveConfig', (event, newConfig)=>{
+ipcMain.on('saveConfig', (_event, newConfig)=>{
   fs.writeFileSync(configPath, newConfig);
 });

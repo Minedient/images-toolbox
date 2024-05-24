@@ -68,8 +68,8 @@ const zBarChange = (event: Event) => {
     const target = event.target as HTMLInputElement;
     zCompression.value = parseInt(target.value);
 }
-
-const changeResizeDefaultOutput = (type: string, event: Event) => {
+//@ts-ignore (Depreceated and will be removed in the future)
+const changeResizeDefaultOutput = (type: string, _event: Event) => {
     showNotification('Default output type changed to ' + type);
 }
 
