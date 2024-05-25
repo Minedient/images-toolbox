@@ -175,12 +175,7 @@ onMounted(() => {
       <p>Resize presets</p>
       <div id="resizePresetList">
         <!--List of button for preset resizing-->
-        <button
-          v-for="preset in presets"
-          :key="preset"
-          class="small-button"
-          @click="directResize(preset)"
-        >
+        <button v-for="preset in presets" :key="preset" class="small-button" @click="directResize(preset)">
           {{ preset }}x
         </button>
       </div>
@@ -189,57 +184,24 @@ onMounted(() => {
         <h3 class="n-h3" :style="gridColSpan(1, 4)" style="text-align: center">Resize control</h3>
         <label :style="gridColSpan(1, 3)">Keep Aspect Ratio?</label>
         <input type="checkbox" id="keepRatio" checked @input="updateKeepRatio" />
-        <label for="scaleInput" class="tooltip" :style="gridAreaSpan(3, 1, 2, 2)"
-          >Scale: <span class="tooltip-text">It set the scale of resizing</span></label
-        >
-        <input
-          :disabled="!keepRatio"
-          id="scaleInput"
-          type="number"
-          :value="scale"
-          min="0.01"
-          max="8"
-          step="0.01"
-          placeholder="0.01-8"
-          @input="settingChange('scale', $event)"
-        />
+        <label for="scaleInput" class="tooltip" :style="gridAreaSpan(3, 1, 2, 2)">Scale: <span class="tooltip-text">It
+            set the scale of resizing</span></label>
+        <input :disabled="!keepRatio" id="scaleInput" type="number" :value="scale" min="0.01" max="8" step="0.01"
+          placeholder="0.01-8" @input="settingChange('scale', $event)" />
         <button class="small-button" id="resetButton" @click="settingChange('reset', $event)">
           Reset
         </button>
-        <input
-          :disabled="!keepRatio"
-          id="scaleBar"
-          :value="scale"
-          type="range"
-          min="0.01"
-          max="8"
-          step="0.01"
-          @input="settingChange('scale', $event)"
-          :style="gridColSpan(3, 2)"
-        />
+        <input :disabled="!keepRatio" id="scaleBar" :value="scale" type="range" min="0.01" max="8" step="0.01"
+          @input="settingChange('scale', $event)" :style="gridColSpan(3, 2)" />
         <label for="newWidth" :style="gridColSpan(1, 2)"> New Width: </label>
-        <input
-          type="number"
-          id="newWidth"
-          :style="gridColSpan(3, 2)"
-          :value="targetWidth"
-          @change="settingChange('width', $event)"
-        />
-        <label
-          for="targetHeight
-                "
-          :style="gridColSpan(1, 2)"
-        >
+        <input type="number" id="newWidth" :style="gridColSpan(3, 2)" :value="targetWidth"
+          @change="settingChange('width', $event)" />
+        <label for="targetHeight
+                " :style="gridColSpan(1, 2)">
           New Height:
         </label>
-        <input
-          type="number"
-          id="targetHeight
-                "
-          :style="gridColSpan(3, 2)"
-          :value="targetHeight"
-          @change="settingChange('height', $event)"
-        />
+        <input type="number" id="targetHeight
+                " :style="gridColSpan(3, 2)" :value="targetHeight" @change="settingChange('height', $event)" />
       </div>
 
       <button @click="resize">Resize!</button>

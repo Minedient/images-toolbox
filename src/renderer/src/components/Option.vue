@@ -128,39 +128,13 @@ const switchPages = (page: string) => {
           <p>Quality: {{ quality }}</p>
           <p>Current Compression Method: {{ method }}</p>
           <p>Current Z-Compression: {{ zCompression }}</p>
-          <input
-            @input="qualityBarChange"
-            id="qualityBar"
-            type="range"
-            min="0"
-            max="100"
-            step="5"
-            :value="quality"
-          />
-          <input
-            @input="methodBarChange"
-            id="methodBar"
-            type="range"
-            min="0"
-            max="6"
-            step="1"
-            :value="method"
-          />
-          <input
-            @input="zBarChange"
-            id="zBar"
-            type="range"
-            min="0"
-            max="9"
-            step="1"
-            :value="zCompression"
-          />
-          <button
-            @click="
-              saveConfig()
-              showNotification('Setting Saved!')
-            "
-          >
+          <input @input="qualityBarChange" id="qualityBar" type="range" min="0" max="100" step="5" :value="quality" />
+          <input @input="methodBarChange" id="methodBar" type="range" min="0" max="6" step="1" :value="method" />
+          <input @input="zBarChange" id="zBar" type="range" min="0" max="9" step="1" :value="zCompression" />
+          <button @click="
+            saveConfig();
+          showNotification('Setting Saved!');
+          ">
             Save
           </button>
           <button @click="resetToDefault">Reset To Default</button>
@@ -184,27 +158,12 @@ const switchPages = (page: string) => {
         <div id="setting-option-panel">
           <!-- Add contents -->
           <h3 :style="gridColSpan(1, 3)">App settings</h3>
-          <label
-            for="outputFolder"
-            class="tooltip"
-            style="text-align: left"
-            :style="gridColSpan(1, 1)"
-            >Output folder
+          <label for="outputFolder" class="tooltip" style="text-align: left" :style="gridColSpan(1, 1)">Output folder
             <span class="tooltip-text">The folder where the output files will be saved</span>
           </label>
-          <input
-            type="text"
-            id="outputFolder"
-            placeholder="Output Folder"
-            :value="outputFolder"
-            :style="gridColSpan(1, 1)"
-          />
-          <button
-            @click="
-              saveConfig()
-              showNotification('Setting Saved!')
-            "
-          >
+          <input type="text" id="outputFolder" placeholder="Output Folder" :value="outputFolder"
+            :style="gridColSpan(1, 1)" />
+          <button @click="saveConfig(); showNotification('Setting Saved!');">
             Save
           </button>
           <button @click="resetToDefault">Reset To Default</button>
@@ -216,6 +175,7 @@ const switchPages = (page: string) => {
 
 <style>
 @keyframes fade {
+
   0%,
   100% {
     opacity: 0;
