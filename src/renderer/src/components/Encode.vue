@@ -36,12 +36,9 @@ const selectedBorder = reactive({
     border: '4px solid var(--image-border-color)'
 });
 
-//TODO: Fix - Only the first 100 images is loaded if a directory is dropped
 const filesDropped = async (event: DragEvent) => {
     event.preventDefault();
     dragzone.value = '';
-    console.log(await readDroppedEntries(event.dataTransfer));
-    /*
     const files = (await readDroppedEntries(event.dataTransfer)).flat().filter(file => file.type.startsWith('image/'));
     files.forEach(file => {
         const img = new Image(); img.src = URL.createObjectURL(file);
@@ -49,7 +46,6 @@ const filesDropped = async (event: DragEvent) => {
         // Sync changes to pinia store
         imagesDataStore.images = imageObjs;
     });
-    */
 }
 
 const filesSelected = async (event: Event) => {
@@ -226,6 +222,7 @@ async function getAllFiles(entries: any[]) {
     async function traverse(entry, files) {
         if (entry.isDirectory) {
             const dirReader = entry.createReader();
+            // Read all the entries in the directory - fixed
             let dirEntries;
             do {
                 dirEntries = await new Promise<any[]>((resolve) => dirReader.readEntries(resolve));
