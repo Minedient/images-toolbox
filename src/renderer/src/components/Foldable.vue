@@ -32,90 +32,94 @@
         a certain height in the document.
 -->
 <script setup lang="ts">
-import { onMounted, onUpdated, ref } from 'vue';
-import { calcMaxHeight } from '../classes/func';
+import { onMounted, onUpdated, ref } from 'vue'
+import { calcMaxHeight } from '../classes/func'
 
-let toggled = false;
+let toggled = false
 
 // Constants
 const maxHeight = ref(0)
 const thisTag = ref(null as HTMLElement | null)
 const props = defineProps({
-    static: {
-        type: Boolean,
-        default: false
-    },
-    external: {
-        type: Boolean,
-        default: false
-    },
-    externalOnly: {
-        type: Boolean,
-        default: false
-    },
-    init: {
-        type: Boolean,
-        default: false
-    }
-
+  static: {
+    type: Boolean,
+    default: false
+  },
+  external: {
+    type: Boolean,
+    default: false
+  },
+  externalOnly: {
+    type: Boolean,
+    default: false
+  },
+  init: {
+    type: Boolean,
+    default: false
+  }
 })
 // Functions
 const valueChange = (div: HTMLElement) => {
-    toggled = !toggled
-    maxHeight.value = calcMaxHeight(toggled, div);
+  toggled = !toggled
+  maxHeight.value = calcMaxHeight(toggled, div)
 }
 const getState = () => {
-    return toggled;
+  return toggled
 }
 const toggle = () => {
-    if (!props.external && !props.externalOnly) return;
-    valueChange(thisTag.value as HTMLElement);
+  if (!props.external && !props.externalOnly) return
+  valueChange(thisTag.value as HTMLElement)
 }
 const onToggle = (event: MouseEvent) => {
-    if (props.externalOnly) return;
-    valueChange(event.target as HTMLElement);
+  if (props.externalOnly) return
+  valueChange(event.target as HTMLElement)
 }
 /**
  * Vue lifecycle hooks
  */
 onUpdated(() => {
-    if (props.static) return
-    const div = thisTag.value;
-    if (div) maxHeight.value = calcMaxHeight(toggled, div)
-});
+  if (props.static) return
+  const div = thisTag.value
+  if (div) maxHeight.value = calcMaxHeight(toggled, div)
+})
 
 onMounted(() => {
-    if (props.init) valueChange(thisTag.value as HTMLElement)
-});
+  if (props.init) valueChange(thisTag.value as HTMLElement)
+})
 
 defineExpose({ toggle, getState })
 </script>
 <template>
-    <div class="collapsable n" :class="{ c: !externalOnly, closed: !toggled }" ref="thisTag" @click="onToggle"
-        :style="{ 'max-height': maxHeight + 'px' }">
-        <slot />
-    </div>
+  <div
+    class="collapsable n"
+    :class="{ c: !externalOnly, closed: !toggled }"
+    ref="thisTag"
+    @click="onToggle"
+    :style="{ 'max-height': maxHeight + 'px' }"
+  >
+    <slot />
+  </div>
 </template>
 <style scoped>
 .n {
-    width: 100%;
-    margin: 0px;
-    padding-top: 5px;
-    padding-bottom: 5px;
+  width: 100%;
+  margin: 0px;
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 /* Ensure it does not have any padding when closed */
 .closed {
-    padding-top: 0px;
-    padding-bottom: 0px;
+  padding-top: 0px;
+  padding-bottom: 0px;
 }
 
 .c {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .collapsable {
-    transition: max-height 0.5s ease;
-    overflow: hidden;
-    text-align: left;
+  transition: max-height 0.5s ease;
+  overflow: hidden;
+  text-align: left;
 }
 </style>

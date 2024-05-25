@@ -1,3 +1,3 @@
 export const AppSettingConstants = {
-    defaultOutputFolder: 'output'
+  defaultOutputFolder: 'output'
 }

@@ -2,14 +2,14 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { WindowConstants as WC} from '../renderer/src/constants/number'
-import fs from 'fs';
+import { WindowConstants as WC } from '../renderer/src/constants/number'
+import fs from 'fs'
 
-let mainWindow: BrowserWindow;
+let mainWindow: BrowserWindow
 
-const configPath = path.join(app.getAppPath(), 'config.json');
+const configPath = path.join(app.getAppPath(), 'config.json')
 // Load the config
-let config = JSON.parse(fs.readFileSync(configPath).toString());
+let config = JSON.parse(fs.readFileSync(configPath).toString())
 
 function createWindow(): void {
   // Create the browser window.
@@ -63,13 +63,16 @@ app.whenReady().then(() => {
   ipcMain.on('ping', () => console.log('pong'))
 
   // Check if config.json exists, if not create it
-  if (!fs.existsSync(configPath)){
-    fs.writeFileSync(configPath, JSON.stringify({
-      "quality": 80,
-      "method": 4,
-      "zCompression": 6,
-      "outputFolder": "output"
-    }));
+  if (!fs.existsSync(configPath)) {
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({
+        quality: 80,
+        method: 4,
+        zCompression: 6,
+        outputFolder: 'output'
+      })
+    )
   }
 
   createWindow()
@@ -96,23 +99,23 @@ app.on('window-all-closed', () => {
 /**
  * openOutputFolder
  */
-ipcMain.on('openOutputFolder', ()=>{
-  shell.openPath(path.join(app.getAppPath(), config.outputFolder));
+ipcMain.on('openOutputFolder', () => {
+  shell.openPath(path.join(app.getAppPath(), config.outputFolder))
 })
 
 // Load the config file and send it to the renderer
-ipcMain.on('loadConfig', ()=>{
-  config = JSON.parse(fs.readFileSync(configPath).toString());
-  mainWindow.webContents.send('configLoaded', config);
+ipcMain.on('loadConfig', () => {
+  config = JSON.parse(fs.readFileSync(configPath).toString())
+  mainWindow.webContents.send('configLoaded', config)
 })
 
 // Just send the config to the renderer
 // target is the window to send the config to
-ipcMain.on('getConfig', (_event, target)=>{
-  console.log('Sending config to renderer: ', target);
-  mainWindow.webContents.send('configReturned', config);
+ipcMain.on('getConfig', (_event, target) => {
+  console.log('Sending config to renderer: ', target)
+  mainWindow.webContents.send('configReturned', config)
 })
 
-ipcMain.on('saveConfig', (_event, newConfig)=>{
-  fs.writeFileSync(configPath, newConfig);
-});
+ipcMain.on('saveConfig', (_event, newConfig) => {
+  fs.writeFileSync(configPath, newConfig)
+})
