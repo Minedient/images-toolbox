@@ -40,6 +40,8 @@ const selectedBorder = reactive({
 const filesDropped = async (event: DragEvent) => {
     event.preventDefault();
     dragzone.value = '';
+    console.log(await readDroppedEntries(event.dataTransfer));
+    /*
     const files = (await readDroppedEntries(event.dataTransfer)).flat().filter(file => file.type.startsWith('image/'));
     files.forEach(file => {
         const img = new Image(); img.src = URL.createObjectURL(file);
@@ -47,6 +49,7 @@ const filesDropped = async (event: DragEvent) => {
         // Sync changes to pinia store
         imagesDataStore.images = imageObjs;
     });
+    */
 }
 
 const filesSelected = async (event: Event) => {
@@ -223,6 +226,14 @@ async function getAllFiles(entries: any[]) {
     async function traverse(entry, files) {
         if (entry.isDirectory) {
             const dirReader = entry.createReader();
+            let dirEntries;
+            do {
+                dirEntries = await new Promise<any[]>((resolve) => dirReader.readEntries(resolve));
+                for (let dirEntry of dirEntries) {
+                    await traverse(dirEntry, files);
+                }
+            } while (dirEntries.length);
+            /*
             await new Promise<void>((resolve) => {
                 dirReader.readEntries(async dirEntries => {
                     for (let dirEntry of dirEntries) {
@@ -231,6 +242,7 @@ async function getAllFiles(entries: any[]) {
                     resolve();
                 });
             });
+            */
         } else if (entry.isFile) {
             await new Promise<void>((resolve) => {
                 entry.file((file: File) => { files.push(file); resolve(); });
