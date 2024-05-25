@@ -152,7 +152,7 @@ const deselectAll = () => {
 
 //@ts-ignore (Depreceated and will be removed in the future)
 const sendToResize = (mode: string) => {
-    (mode === 'all')? imagesDataStore.images = imageObjs : imagesDataStore.images = selectedImages;
+    (mode === 'all') ? imagesDataStore.images = imageObjs : imagesDataStore.images = selectedImages;
     showNotification('Images sent to resize page!');
 }
 
@@ -162,7 +162,10 @@ const sendToResize = (mode: string) => {
  * TODO: Allow user to choose the output directory and default behavior
  * 
  * @param arr 
+ * @deprecated Use queuedConvertToWebp instead
+ * @see queuedConvertToWebp
  */
+//@ts-ignore (Depreceated and will be removed in the future)
 const convertToWebp = (arr: ImageObj[]) => {
     currentlyEncoding.value = true;
 
@@ -190,6 +193,66 @@ const convertToWebp = (arr: ImageObj[]) => {
                 }, 3000);
             }
         });
+    });
+}
+
+/**
+ * Use cwebp to convert the images to webp format
+ * By default, the images is saved in the program directory under the 'output' folder
+ * 
+ * This function uses a queue to limit the number of concurrent encodings, so the program
+ * won't render unresponsive when encoding a large number of images. As it can takes a 
+ * huge amount of computer resources.
+ * 
+ * @param arr 
+ */
+const queuedConvertToWebp = async (arr: ImageObj[]) => {
+    currentlyEncoding.value = true;
+
+    // Extract the list of infos from the array of ImageObj
+    const infos = arr.map(obj => ({ path: obj.file.path, name: obj.file.name }));
+
+    // Number of maximum concurrent encodings (TODO: Allow user to set this value in the settings?)
+    const maxConcurrentEncodings = 4;
+
+    const queue = [];
+
+    for (const info of infos) {
+        const name = info.name.split('.').slice(0, -1).join('.');
+        const outputPath = './output/' + name + '.webp';
+        const params = new EncodeParameters(isAuto.value, isLossless.value, zCompression.value, quality.value, method.value);
+
+        // Add the encoding promise to the queue
+        queue.push(
+            //@ts-ignore (It is defined in preload.ts)
+            // Convert the image to webp and update the progress bar
+            window.api.convertToWebp(info.path, outputPath, params).then(() => {
+                encodingProgress.value++;
+            })
+        );
+
+        // If the queue is full, wait for one of the encodings to finish before starting a new one
+        if (queue.length >= maxConcurrentEncodings) {
+            //Block until one of the encodings is finished
+            await Promise.race(queue).then(() => {
+                //Remove the finished encoding from the queue
+                queue.shift();
+            });
+        }
+    }
+    
+    // Wait for any remaining encodings to finish
+    Promise.all(queue).then(() => {
+        // If all images are encoded, show a 'Finished!' text and disappear with animation after 3 seconds
+        if (encodingProgress.value === infos.length) {
+            encodeFinished.value = true;    // Show the 'Finished!' text
+            setTimeout(() => {
+                encodeFinished.value = false;
+                currentlyEncoding.value = false;
+                encodingProgress.value = 0;
+            }, 3000);
+            showNotification('Encoding finished!');
+        }
     });
 }
 
@@ -230,16 +293,6 @@ async function getAllFiles(entries: any[]) {
                     await traverse(dirEntry, files);
                 }
             } while (dirEntries.length);
-            /*
-            await new Promise<void>((resolve) => {
-                dirReader.readEntries(async dirEntries => {
-                    for (let dirEntry of dirEntries) {
-                        await traverse(dirEntry, files);
-                    }
-                    resolve();
-                });
-            });
-            */
         } else if (entry.isFile) {
             await new Promise<void>((resolve) => {
                 entry.file((file: File) => { files.push(file); resolve(); });
@@ -251,8 +304,6 @@ async function getAllFiles(entries: any[]) {
 </script>
 
 <template>
-    <!--Create a temporary div here during encoding to show the progress bar, when fished. Show a 'Finished!' text and disappear with animation after 3 seconds-->
-    <!--TODO-->
     <div id="encode-related">
         <p v-if="currentlyEncoding && !encodeFinished">Encoding...{{ encodingProgress }}/{{ selectedImages.length }}</p>
         <p v-else-if="encodeFinished">Finished!</p>
@@ -273,7 +324,7 @@ async function getAllFiles(entries: any[]) {
                 </div>
                 <div id="button-list">
                     <button class="small-button" @click="openFolder">Open folder</button>
-                    <button class="small-button" @click="convertToWebp(selectedImages)">Encode selected</button>
+                    <button class="small-button" @click="queuedConvertToWebp(selectedImages)">Encode selected</button>
                     <button class="small-button" @click="clearImagesPanel">Clear All</button>
                 </div>
                 <div id="button-list">
