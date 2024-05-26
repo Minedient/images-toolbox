@@ -14,7 +14,14 @@ extraFiles:
 asarUnpack:
   - resources/**
 win:
+  target: msi 
   executableName: images-toolbox
+msi:
+  oneClick: false
+  perMachine: false
+  runAfterFinish: false
+  createDesktopShortcut: always
+  shortcutName: ${productName}
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}

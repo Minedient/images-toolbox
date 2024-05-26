@@ -10,6 +10,16 @@ let mainWindow: BrowserWindow
 const appPath = app.isPackaged ? path.dirname(app.getPath('exe')) : app.getAppPath();
 const configPath = path.join(appPath, 'config.json')
 // Load the config
+try {
+  fs.readFileSync(configPath) // Check if the file exists
+}catch (e) {
+  fs.writeFileSync(configPath, JSON.stringify({
+    quality: 80,
+    method: 4,
+    zCompression: 6,
+    outputFolder: 'output'
+  }))
+}
 let config = JSON.parse(fs.readFileSync(configPath).toString())
 
 function createWindow(): void {
@@ -63,19 +73,6 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
-  // Check if config.json exists, if not create it
-  if (!fs.existsSync(configPath)) {
-    fs.writeFileSync(
-      configPath,
-      JSON.stringify({
-        quality: 80,
-        method: 4,
-        zCompression: 6,
-        outputFolder: 'output'
-      })
-    )
-  }
-
   createWindow()
 
   app.on('activate', function () {
@@ -99,9 +96,13 @@ app.on('window-all-closed', () => {
 
 /**
  * openOutputFolder
- * TODO: This ONLY works in development, need to find a way to make it work in production
  */
 ipcMain.on('openOutputFolder', () => {
+  try{
+    fs.readdirSync(path.join(appPath, config.outputFolder)) // Check if the folder exists
+  }catch (e) {
+    fs.mkdirSync(path.join(appPath, config.outputFolder)) // Create the output folder if it doesn't exist
+  }
   shell.openPath(path.join(appPath, config.outputFolder))
 })
 
