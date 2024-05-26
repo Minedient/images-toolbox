@@ -7,7 +7,8 @@ import fs from 'fs'
 
 let mainWindow: BrowserWindow
 
-const configPath = path.join(app.getAppPath(), 'config.json')
+const appPath = app.isPackaged ? path.dirname(app.getPath('exe')) : app.getAppPath();
+const configPath = path.join(appPath, 'config.json')
 // Load the config
 let config = JSON.parse(fs.readFileSync(configPath).toString())
 
@@ -98,9 +99,10 @@ app.on('window-all-closed', () => {
 
 /**
  * openOutputFolder
+ * TODO: This ONLY works in development, need to find a way to make it work in production
  */
 ipcMain.on('openOutputFolder', () => {
-  shell.openPath(path.join(app.getAppPath(), config.outputFolder))
+  shell.openPath(path.join(appPath, config.outputFolder))
 })
 
 // Load the config file and send it to the renderer

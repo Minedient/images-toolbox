@@ -235,7 +235,7 @@ const queuedConvertToWebp = async (arr: ImageObj[]) => {
     const infos = arr.map((obj) => ({ path: obj.file.path, name: obj.file.name }))
 
     // Number of maximum concurrent encodings (TODO: Allow user to set this value in the settings?)
-    const maxConcurrentEncodings = 4
+    const maxConcurrentEncodings = 8
 
     const queue = []
 
@@ -473,7 +473,7 @@ async function getAllFiles(entries: any[]) {
 /* ID */
 #encode-related {
     display: grid;
-    grid-template-columns: 150px 1fr;
+    grid-template-columns: 180px 1fr;
 }
 
 #encode-related p {
