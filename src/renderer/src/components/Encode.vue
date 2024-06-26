@@ -59,9 +59,9 @@ const filesDropped = async (event: DragEvent) => {
 
 const filesSelected = async (event: Event) => {
     event.preventDefault()
-    const target = event.target as HTMLInputElement
-    const files = target.files
-        ; (files ? [...files].filter((file) => file.type.startsWith('image/')) : []).forEach((file) => {
+    const target = event.target as HTMLInputElement;
+    const files = target.files;
+        (files ? [...files].filter((file) => file.type.startsWith('image/')) : []).forEach((file) => {
             const img = new Image()
             img.src = URL.createObjectURL(file)
             img.onload = () =>
@@ -164,6 +164,17 @@ const selectAll = () => {
 
 const deselectAll = () => {
     selectedImages.splice(0, selectedImages.length)
+}
+
+const selectEncodables = () => {
+    deselectAll()
+    imageObjs.forEach((obj)=> {
+        const ext = obj.file.name.split('.').pop()?.toLowerCase();
+        // Some common still image formats
+        if (ext === 'png' || ext === 'jpeg' || ext === 'jpg' || ext === 'bmp' || ext === 'tiff' || ext === 'webp') {
+            selectedImages.push(obj)
+        }
+    })
 }
 
 //@ts-ignore (Depreceated and will be removed in the future)
@@ -370,6 +381,9 @@ async function getAllFiles(entries: any[]) {
                     </button>
                     <button v-if="imageObjs.length !== 0" class="small-button" @click="deselectAll">
                         Deselect all
+                    </button>
+                    <button v-if="imageObjs.length !== 0" class="small-button" @click="selectEncodables">
+                        Select all (filtered)
                     </button>
                 </div>
                 <hr class="fw-hr" />

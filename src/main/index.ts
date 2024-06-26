@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, crashReporter } from 'electron'
 import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -9,6 +9,7 @@ let mainWindow: BrowserWindow
 
 const appPath = app.isPackaged ? path.dirname(app.getPath('exe')) : app.getAppPath();
 const configPath = path.join(appPath, 'config.json')
+
 // Load the config
 try {
   fs.readFileSync(configPath) // Check if the file exists
@@ -20,6 +21,15 @@ try {
     outputFolder: 'output'
   }))
 }
+
+//Crash reporter
+crashReporter.start({
+  submitURL: "https://example.com",
+  uploadToServer: false,
+})
+
+console.log(`Crash dumps directory: ${app.getPath('crashDumps')}`);
+
 let config = JSON.parse(fs.readFileSync(configPath).toString())
 
 function createWindow(): void {

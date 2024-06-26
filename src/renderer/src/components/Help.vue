@@ -77,6 +77,25 @@
                     </ul>
                 </p>
             </Collapsable>
+            <Collapsable title="Troubleshooting" type="h2" static>
+                <p>
+                    If you encounter any problem, please refer to the following list of common issues.
+                    <h3>Common issues:</h3>
+                    <ul>
+                        <li>Image not showing up</li>
+                            <ul>
+                                <li>Make sure the image is in the correct format</li>
+                                <li>Make sure the image is not corrupted</li>
+                            </ul>
+                        <li>Image not encoding</li>
+                            <ul>
+                                <li>Check your platform: Only x86 window and arm64 linux is tested at this moment</li>
+                                <li>If you are on linux, ensure the permission for cwebp is set to allow execution, otherwise the program won't function</li>
+                            </ul>
+                    </ul>
+                    If you still encounter problem, please refer to the <a href="https://github.com/Minedient/images-toolbox" target="_blank">Github repository</a> and open an issue.
+                    </p>
+            </Collapsable>
         </div>
     </div>
 </template>
