@@ -47,3 +47,33 @@ export const useImagesData = defineStore('imagesDataStore', () => {
   const images: ImageObj[] = reactive([])
   return { images }
 })
+
+export class MarkovNode {
+  value: string = ''
+  next: { node: MarkovNode, weight: number }[] = []
+  constructor(value: string = '') {
+    this.value = value
+  }
+  addNext(node: MarkovNode, weight: number) {
+    this.next.push({ node, weight })
+  }
+  getNext() {
+    let totalWeight = this.next.reduce((acc, cur) => acc + cur.weight, 0)
+    let random = Math.random() * totalWeight
+    let currentWeight = 0
+    for (let i = 0; i < this.next.length; i++) {
+      currentWeight += this.next[i].weight
+      if (random < currentWeight) {
+        return this.next[i].node
+      }
+    }
+    return this.next[this.next.length - 1].node
+  }
+  getValue() {
+    return this.value
+  }
+}
+
+export class MarkovChain {
+  currentState: MarkovNode = new MarkovNode
+}
