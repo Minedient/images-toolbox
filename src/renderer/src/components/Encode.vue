@@ -4,6 +4,9 @@ import Collapsable from './Collapsable.vue'
 import { EncodeParameters, ImageObj, useRunTimeParameters, useImagesData } from '../classes/objects'
 import { showNotification } from '../classes/func'
 
+// Load the JSZip library
+import JSZip from 'jszip'
+
 // Use pinia to keep check on the runtime parameters
 useRunTimeParameters().$subscribe((_mutation, state) => {
     zCompression.value = state.zCompression
@@ -36,13 +39,68 @@ const selectedBorder = reactive({
     border: '4px solid var(--image-border-color)'
 })
 
+const loadImageToStore = (file: File) => {
+    const img = new Image()
+    img.src = URL.createObjectURL(file)
+    img.onload = () =>
+        imageObjs.push({
+            file: file,
+            fileURL: URL.createObjectURL(file),
+            width: img.width,
+            height: img.height
+        })
+    // Sync changes to pinia store
+    imagesDataStore.images = imageObjs
+}
+
 const filesDropped = async (event: DragEvent) => {
     event.preventDefault()
     dragzone.value = ''
-    const files = (await readDroppedEntries(event.dataTransfer))
-        .flat()
-        .filter((file) => file.type.startsWith('image/'))
-    files.forEach((file) => {
+    const drops = (await readDroppedEntries(event.dataTransfer)).flat()
+
+    // Rewrite the following code to simplify the process
+    // and remove unnecessary code
+    // and make it more readable
+    const files = drops.filter((file) => file.type.startsWith('image/') || file.name.endsWith('.zip') || file.name.endsWith('.7z'))
+
+    // Read files
+    files.forEach(file => {
+        if (file.type.startsWith('image/')) loadImageToStore(file)
+
+        else {  //Read zip files, find all images file, get their name and file type then put them into the store
+            const reader = new FileReader()
+            reader.onload = async () => {
+                const zipData = reader.result as ArrayBuffer
+                const zip = await JSZip.loadAsync(zipData)
+                const entries = Object.values(zip.files)
+                const zippedFiles = entries
+                    .filter((entry) => !entry.dir)
+                zippedFiles.forEach(async (entry) => {
+                    const blob = await entry.async('blob')
+                    const file = new File([blob], entry.name, { type: blob.type }); // the type thing not so working, but still kinda works
+                    loadImageToStore(file);
+                });
+
+                /*
+                    .map((entry) => entry.async('blob'))
+                const blobs = await Promise.all(zippedFiles)
+                blobs.forEach(blob => {
+                    const file = new File([blob], entry.name, { type: blob.type });
+                    loadImageToStore(file);
+                });
+                */
+            }
+            reader.readAsArrayBuffer(file)
+            showNotification('Reading zip files ' + file.name) //Fix: No delay between notifications
+        }
+    })
+}
+
+const filesSelected = async (event: Event) => {
+    event.preventDefault()
+    const target = event.target as HTMLInputElement;
+    const files = target.files;
+    (files ? [...files].filter((file) => file.type.startsWith('image/')) : []).forEach((file) => {
         const img = new Image()
         img.src = URL.createObjectURL(file)
         img.onload = () =>
@@ -55,25 +113,6 @@ const filesDropped = async (event: DragEvent) => {
         // Sync changes to pinia store
         imagesDataStore.images = imageObjs
     })
-}
-
-const filesSelected = async (event: Event) => {
-    event.preventDefault()
-    const target = event.target as HTMLInputElement;
-    const files = target.files;
-        (files ? [...files].filter((file) => file.type.startsWith('image/')) : []).forEach((file) => {
-            const img = new Image()
-            img.src = URL.createObjectURL(file)
-            img.onload = () =>
-                imageObjs.push({
-                    file: file,
-                    fileURL: URL.createObjectURL(file),
-                    width: img.width,
-                    height: img.height
-                })
-            // Sync changes to pinia store
-            imagesDataStore.images = imageObjs
-        })
 
     //Ensure the input is cleared so that the same files can be selected again and trigger the change event correctly
     target.value = ''
@@ -168,7 +207,7 @@ const deselectAll = () => {
 
 const selectEncodables = () => {
     deselectAll()
-    imageObjs.forEach((obj)=> {
+    imageObjs.forEach((obj) => {
         const ext = obj.file.name.split('.').pop()?.toLowerCase();
         // Some common still image formats
         if (ext === 'png' || ext === 'jpeg' || ext === 'jpg' || ext === 'bmp' || ext === 'tiff' || ext === 'webp') {
